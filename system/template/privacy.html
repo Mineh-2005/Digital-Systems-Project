@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+<body class="bg-gray-50">
+
+     <!-- Nav Bar -->
+    <nav class="mm-nav" id="mmNav">
+        <div class="mm-nav-inner">
+            <a href="/" class="mm-logo">
+                <div class="mm-logo-mark">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                    </svg>
+                </div>
+                MarketMatch
+            </a>
+            <div class="mm-nav-right">
+                <span style="font-size:0.85rem;color:var(--muted)">Don't have an account?</span>
+                <a href="/signup" class="btn-primary btn-primary-sm">Sign Up</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto p-8">
+        <div class="bg-white rounded-lg shadow-md p-8">
+            <div class="flex justify-between items-start mb-6">
+                <h1 class="text-3xl font-bold text-gray-800">Privacy Policy</h1>
+                <button onclick="goBack()" class="mm-back-link"> Back</button>
+            </div>
+            
+            <div class="space-y-6 text-gray-700">
+                <section>
+                    <h2 class="text-xl font-semibold mb-3">1. Information We Collect</h2>
+                    <p>We collect information you provide directly to us, including:</p>
+                    <ul class="list-disc ml-6 mt-2 space-y-1">
+                        <li>Name and email address</li>
+                        <li>CV content (education, skills, work experience)</li>
+                        <li>Job preferences and search queries</li>
+                    </ul>
+                </section>
+                
+                <section>
+                    <h2 class="text-xl font-semibold mb-3">2. How We Use Your Information</h2>
+                    <p>We use the information we collect to:</p>
+                    <ul class="list-disc ml-6 mt-2 space-y-1">
+                        <li>Provide and improve our job recommendation service</li>
+                        <li>Analyze CV content to extract relevant information</li>
+                        <li>Match your profile with suitable job opportunities</li>
+                        <li>Communicate with you about your account and recommendations</li>
+                    </ul>
+                </section>
+                
+                <section>
+                    <h2 class="text-xl font-semibold mb-3">3. Data Storage and Security</h2>
+                    <p>We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, or destruction.</p>
+                </section>
+                
+                <section>
+                    <h2 class="text-xl font-semibold mb-3">4. Data Sharing</h2>
+                    <p>We do not sell or share your personal information with third parties except:</p>
+                    <ul class="list-disc ml-6 mt-2 space-y-1">
+                        <li>With your explicit consent</li>
+                        <li>To comply with legal obligations</li>
+                        <li>To protect our rights and safety</li>
+                    </ul>
+                </section>
+                
+                <section>
+                    <h2 class="text-xl font-semibold mb-3">5. GDPR Compliance</h2>
+                    <p>In accordance with GDPR, you have the right to:</p>
+                    <ul class="list-disc ml-6 mt-2 space-y-1">
+                        <li>Access your personal data</li>
+                        <li>Correct inaccurate data</li>
+                        <li>Request deletion of your data</li>
+                        <li>Object to data processing</li>
+                        <li>Data portability</li>
+                    </ul>
+                </section>
+                
+                <section>
+                    <h2 class="text-xl font-semibold mb-3">6. Cookies and Tracking</h2>
+                    <p>We use localStorage to store session information and user preferences. No third-party tracking cookies are used.</p>
+                </section>
+                
+                <section>
+                    <h2 class="text-xl font-semibold mb-3">7. Data Retention</h2>
+                    <p>We retain your personal information only for as long as necessary to provide our services and fulfill the purposes outlined in this policy.</p>
+                </section>
+                
+                <section>
+                    <h2 class="text-xl font-semibold mb-3">8. Contact Us</h2>
+                    <p>If you have questions about this Privacy Policy, please contact us at: privacy@jobrecommender.com</p>
+                </section>
+            </div>
+            
+            <div class="mt-8 pt-6 border-t">
+                <p class="text-sm text-gray-500">Last updated: March 2026</p>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+</body>
+</html>

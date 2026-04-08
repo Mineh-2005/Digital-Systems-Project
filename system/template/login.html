@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In — MarketMatch</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .login-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 1.5rem;
+            position: relative;
+        }
+
+        .login-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            animation: fadeInUp 0.6s ease both;
+        }
+
+        /* Left panel — form */
+        .login-form-panel {
+            width: 100%;
+            padding: 3rem;
+        }
+        @media (min-width: 768px) {
+            .login-form-panel { width: 50%; }
+        }
+
+        /* Right panel — info */
+        .login-info-panel {
+            display: none;
+            width: 50%;
+            background: linear-gradient(135deg, var(--violet) 0%, var(--purple) 100%);
+            padding: 3rem;
+            color: white;
+            flex-direction: column;
+            justify-content: center;
+        }
+        @media (min-width: 768px) {
+            .login-info-panel { display: flex; }
+        }
+
+        .info-feature {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.875rem;
+            margin-bottom: 1.5rem;
+        }
+        .info-feature-icon {
+            width: 22px;
+            height: 22px;
+            flex-shrink: 0;
+            margin-top: 0.1rem;
+            opacity: 0.9;
+        }
+        .info-feature h3 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+        .info-feature p {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Nav -->
+    <nav class="mm-nav" id="mmNav">
+        <div class="mm-nav-inner">
+            <a href="/" class="mm-logo">
+                <div class="mm-logo-mark">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                    </svg>
+                </div>
+                MarketMatch
+            </a>
+            <div class="mm-nav-right">
+                <span style="font-size:0.85rem;color:var(--muted)">Don't have an account?</span>
+                <a href="/signup" class="btn-primary btn-primary-sm">Sign Up</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main -->
+    <div class="login-wrapper">
+        <div class="mm-hero-pattern"></div>
+
+        <div class="login-card">
+
+            <!-- Form panel -->
+            <div class="login-form-panel">
+                <div style="margin-bottom:2rem">
+                    <h1 style="font-size:1.6rem;font-weight:800;letter-spacing:-0.5px;color:var(--text);margin-bottom:0.4rem">Welcome back</h1>
+                    <p style="font-size:0.9rem;color:var(--muted)">Sign in to your MarketMatch account</p>
+                </div>
+
+                <!-- Error banner -->
+                <div id="errorBanner" class="mm-banner error" style="display:none">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span id="errorMsg">Invalid email or password.</span>
+                </div>
+
+                <form id="loginForm" novalidate>
+                    <div style="margin-bottom:1.25rem">
+                        <label class="mm-label" for="email">Email Address</label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            class="mm-input"
+                            placeholder="you@example.com"
+                            required>
+                    </div>
+
+                    <div style="margin-bottom:1rem">
+                        <label class="mm-label" for="password">Password</label>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            class="mm-input"
+                            placeholder="••••••••"
+                            required>
+                    </div>
+
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.75rem">
+                        <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;color:var(--text-sm);cursor:pointer">
+                            <input type="checkbox" style="accent-color:var(--violet);width:15px;height:15px">
+                            Remember me
+                        </label>
+                        <a href="/forgot-password" style="font-size:0.85rem;font-weight:600;color:var(--violet);transition:opacity 0.2s"
+                            onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=1">
+                            Forgot password?
+                        </a>
+                    </div>
+
+                    <button type="submit" class="btn-primary" style="width:100%;justify-content:center;padding:0.85rem">
+                        Sign In
+                    </button>
+
+                    <p style="text-align:center;font-size:0.85rem;color:var(--muted);margin-top:1.5rem">
+                        Don't have an account?
+                        <a href="/signup" style="color:var(--violet);font-weight:600;transition:opacity 0.2s"
+                            onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=1">
+                            Sign up
+                        </a>
+                    </p>
+                </form>
+            </div>
+
+            <!-- Info panel -->
+            <div class="login-info-panel">
+                <div style="margin-bottom:2.5rem">
+                    <div style="width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem">
+                        <svg width="26" height="26" fill="none" stroke="white" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                        </svg>
+                    </div>
+                    <h2 style="font-size:1.5rem;font-weight:800;letter-spacing:-0.5px;margin-bottom:0.75rem">AI-Driven Job Matching</h2>
+                    <p style="font-size:0.9rem;opacity:0.85;line-height:1.7">
+                        Upload your CV and let MarketMatch find the right career opportunities matched to your skills and qualifications.
+                    </p>
+                </div>
+
+                <div>
+                    <div class="info-feature">
+                        <svg class="info-feature-icon" fill="none" stroke="white" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <div>
+                            <h3>Smart CV Analysis</h3>
+                            <p>Automatic degree and skills extraction from your CV</p>
+                        </div>
+                    </div>
+                    <div class="info-feature">
+                        <svg class="info-feature-icon" fill="none" stroke="white" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                        <div>
+                            <h3>Personalised Recommendations</h3>
+                            <p>Jobs matched and scored against your unique profile</p>
+                        </div>
+                    </div>
+                    <div class="info-feature">
+                        <svg class="info-feature-icon" fill="none" stroke="white" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                        </svg>
+                        <div>
+                            <h3>Skills Gap Analysis</h3>
+                            <p>Know exactly what to learn to reach your target role</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mm-footer">
+        <div class="mm-footer-links">
+            <a href="/privacy">Privacy Policy</a>
+            <a href="/terms">Terms of Service</a>
+        </div>
+        <p class="mm-footer-copy">© 2026 MarketMatch</p>
+    </footer>
+
+    <!-- Toast -->
+    <div id="mmToast" class="mm-toast"></div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const email    = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const banner   = document.getElementById('errorBanner');
+            const errorMsg = document.getElementById('errorMsg');
+            const btn      = document.querySelector('button[type="submit"]');
+
+            // Validate email first
+            if (!email) {
+                errorMsg.textContent = 'Please enter your email address.';
+                banner.style.display = 'flex';
+                document.getElementById('email').focus();
+                return;
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                errorMsg.textContent = 'Please enter a valid email address.';
+                banner.style.display = 'flex';
+                document.getElementById('email').focus();
+                return;
+            }
+
+            // Then validate password
+            if (!password) {
+                errorMsg.textContent = 'Please enter your password.';
+                banner.style.display = 'flex';
+                document.getElementById('password').focus();
+                return;
+            }
+
+            if (password.length < 8) {
+                errorMsg.textContent = 'Password must be at least 8 characters.';
+                banner.style.display = 'flex';
+                document.getElementById('password').focus();
+                return;
+            }
+
+            banner.style.display = 'none';
+            btn.textContent = 'Signing in...';
+            btn.disabled    = true;
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    localStorage.setItem('userLoggedIn', 'true');
+                    localStorage.setItem('userEmail', data.email);
+                    localStorage.setItem('userName', data.name);
+                    localStorage.setItem('isAdmin', data.is_admin ? 'true' : 'false');
+                    window.location.href = '/dashboard';
+                } else {
+                    errorMsg.textContent = data.error || 'Login failed. Please try again.';
+                    banner.style.display = 'flex';
+                    btn.textContent = 'Sign In';
+                    btn.disabled    = false;
+                }
+
+            } catch (err) {
+                errorMsg.textContent = 'Could not connect to server. Please try again.';
+                banner.style.display = 'flex';
+                btn.textContent = 'Sign In';
+                btn.disabled    = false;
+            }
+        });
+    </script>
+
+</body>
+</html>

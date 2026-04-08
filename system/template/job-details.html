@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Details — MarketMatch</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/styles.css">
+    <style>
+        .job-card {
+            background: #ffffff;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #8b5cf6;
+        }
+
+        .detail-tag {
+            padding: 0.45rem 0.9rem;
+            background: #f3f4f6;
+            color: #374151;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .score-card {
+            min-width: 150px;
+            background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+            color: white;
+            border-radius: 18px;
+            padding: 1.5rem;
+            box-shadow: 0 12px 24px rgba(124, 58, 237, 0.2);
+        }
+
+        .primary-action {
+            flex: 1;
+            background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+            color: #ffffff;
+            padding: 0.9rem 1.4rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+        }
+
+        .primary-action:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 18px rgba(124, 58, 237, 0.18);
+        }
+
+        .secondary-action {
+            padding: 0.9rem 1.4rem;
+            border: 1px solid #d1d5db;
+            border-radius: 12px;
+            font-weight: 600;
+            color: #374151;
+            background: #ffffff;
+            transition: all 0.2s;
+        }
+
+        .secondary-action:hover {
+            background: #f9fafb;
+            border-color: #c4b5fd;
+            color: #6d28d9;
+        }
+
+        .skill-badge {
+            padding: 0.6rem 1rem;
+            background: #f5f3ff;
+            color: #5b21b6;
+            border-radius: 999px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .match-block {
+            border-left: 4px solid #8b5cf6;
+            padding-left: 1rem;
+        }
+
+        .match-block.secondary {
+            border-left-color: #6366f1;
+        }
+
+        .match-block.tertiary {
+            border-left-color: #4f46e5;
+        }
+
+        .calc-box {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 1rem;
+        }
+
+        .fade-up {
+            animation: fadeUp 0.45s ease forwards;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <nav class="mm-nav" id="mmNav">
+        <div class="mm-nav-inner">
+            <a href="/dashboard" class="mm-logo">
+                <div class="mm-logo-mark">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                    </svg>
+                </div>
+                MarketMatch
+            </a>
+
+            <div class="mm-nav-links">
+                <a href="/dashboard" class="mm-nav-link">Dashboard</a>
+                <a href="/upload" class="mm-nav-link">Upload CV</a>
+                <a href="/results" class="mm-nav-link active">Jobs</a>
+                <a href="/saved-jobs" class="mm-nav-link">Saved Jobs</a>
+                <a href="/admin" id="adminNavLink" class="mm-nav-link" style="display:none;color:var(--purple);font-weight:700">Admin</a>
+            </div>
+
+            <div class="mm-nav-right">
+                <a href="/profile" id="navGreeting" class="mm-nav-greeting">Welcome, [Name]!</a>
+                <button onclick="logout()" class="mm-logout-btn">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <main style="max-width: 1200px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem;">
+        <div class="job-card p-8 mb-6 fade-up">
+            <div class="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6 mb-6">
+                <div class="flex-1">
+                    <div class="mb-4">
+                        <a href="/results" class="inline-flex items-center text-sm font-medium text-violet-700 hover:text-violet-800 transition">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                            </svg>
+                            Back to Results
+                        </a>
+                    </div>
+
+                    <h1 class="text-3xl font-bold text-gray-900 mb-3" id="jobTitle">Software Developer</h1>
+
+                    <div class="flex flex-wrap items-center gap-5 text-gray-600 mb-4">
+                        <span class="flex items-center text-base">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                            <span id="companyName">Tech Solutions Ltd</span>
+                        </span>
+
+                        <span class="flex items-center text-base">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span id="location">London, UK</span>
+                        </span>
+
+                        <span class="flex items-center text-base">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span id="salary" class="font-semibold">£35,000</span>
+                        </span>
+                    </div>
+
+                    <div class="flex flex-wrap gap-3">
+                        <span id="employmentType" class="detail-tag">Full-time</span>
+                        <span id="experienceLevel" class="detail-tag">Graduate</span>
+                        <span id="industry" class="detail-tag">Technology</span>
+                    </div>
+                </div>
+
+                <div class="score-card text-center">
+                    <div class="text-5xl font-bold mb-1" id="matchScore">96%</div>
+                    <div class="text-sm opacity-90">Overall Match</div>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
+                <!-- <button class="primary-action">
+                    Apply Now
+                </button> -->
+                <button id="applyBtn" onclick="applyNow()" class="btn-primary btn-primary-sm justify-center">
+                    Apply Now
+                </button>
+                <button id="saveBtn" onclick="toggleSaveJob()" class="secondary-action">
+                    Save Job
+                </button>
+                <button onclick="shareJob()" class="secondary-action">
+                    Share
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 space-y-6">
+                <div class="job-card p-6 fade-up">
+                    <h2 class="section-title">Job Description</h2>
+                    <div id="jobDescription" class="text-gray-700 leading-relaxed space-y-3">
+                        <p>We are seeking a talented Software Developer to join our dynamic team. You will be responsible for developing and maintaining high-quality software solutions that meet our clients' needs.</p>
+                        <p>This role offers excellent opportunities for career growth and development in a supportive, innovative environment.</p>
+                    </div>
+                </div>
+
+                <div class="job-card p-6 fade-up">
+                    <h2 class="section-title">Required Skills</h2>
+                    <div id="requiredSkillsList" class="flex flex-wrap gap-3"></div>
+                </div>
+
+                <div class="job-card p-6 fade-up">
+                    <h2 class="section-title">Requirements</h2>
+                    <div class="space-y-3 text-gray-700">
+                        <div class="flex items-start">
+                            <span class="text-violet-600 mr-3 mt-1">●</span>
+                            <span>Degree: <span id="degreesAccepted" class="font-medium">BSc Computer Science or related field</span></span>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-violet-600 mr-3 mt-1">●</span>
+                            <span>Experience level: <span id="experienceReq" class="font-medium">Graduate / Entry Level</span></span>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-violet-600 mr-3 mt-1">●</span>
+                            <span>Strong problem-solving and analytical skills</span>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-violet-600 mr-3 mt-1">●</span>
+                            <span>Excellent communication and teamwork abilities</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="job-card p-6 fade-up">
+                    <h2 class="section-title">Skills Analysis</h2>
+
+                    <div class="mb-5">
+                        <div class="text-sm font-medium text-gray-700 mb-3">You Have:</div>
+                        <div id="matchedSkills" class="space-y-2"></div>
+                    </div>
+
+                    <div>
+                        <div class="text-sm font-medium text-gray-700 mb-3">Skills to Develop:</div>
+                        <div id="missingSkills" class="space-y-2"></div>
+                    </div>
+                </div>
+
+                <div class="job-card p-6 fade-up">
+                    <h2 class="section-title">Degree Match</h2>
+                    <div id="degreeMatchStatus" class="flex items-center">
+                        <svg class="w-6 h-6 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="text-gray-800 font-medium">Your degree matches this role</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-1 space-y-6">
+                <div class="job-card p-6 fade-up">
+                    <h2 class="section-title text-lg">Why This Match?</h2>
+
+                    <div class="mb-6">
+                        <p class="text-sm text-gray-700 leading-relaxed">
+                            Our AI algorithm analysed your CV against this job using three key factors. Here is the detailed breakdown:
+                        </p>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="match-block">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="flex-1">
+                                    <span class="text-gray-900 font-semibold text-sm">1. CV-Job Description Match</span>
+                                    <p class="text-xs text-gray-600 mt-1">TF-IDF cosine similarity analysis</p>
+                                </div>
+                                <span class="text-gray-900 font-bold" id="textScore">55%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                                <div id="textBar" class="bg-violet-500 h-2 rounded-full" style="width: 55%"></div>
+                            </div>
+                            <div class="text-xs text-gray-600 bg-gray-50 p-3 rounded-xl mt-2">
+                                <strong>What this means:</strong> Your CV content has a <span id="textScorePercent">55%</span> similarity to this job description. The algorithm compared keywords, technical terms, and contextual language between your CV and the job posting.
+                            </div>
+                            <div class="text-xs text-gray-700 mt-2">
+                                <strong>Weight in final score:</strong> 55% (most important factor)
+                            </div>
+                        </div>
+
+                        <div class="match-block secondary">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="flex-1">
+                                    <span class="text-gray-900 font-semibold text-sm">2. Skills Overlap</span>
+                                    <p class="text-xs text-gray-600 mt-1">Direct skills comparison</p>
+                                </div>
+                                <span class="text-gray-900 font-bold" id="skillScore">35%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                                <div id="skillBar" class="bg-indigo-500 h-2 rounded-full" style="width: 35%"></div>
+                            </div>
+                            <div class="text-xs text-gray-600 bg-gray-50 p-3 rounded-xl mt-2">
+                                <strong>What this means:</strong> You have <span id="matchedSkillCount">3</span> out of <span id="totalSkillCount">6</span> required skills. The algorithm identified which technical and soft skills from your CV match the job requirements.
+                            </div>
+                            <div class="text-xs text-gray-700 mt-2">
+                                <strong>Weight in final score:</strong> 35% (second priority)
+                            </div>
+                        </div>
+
+                        <div class="match-block tertiary">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="flex-1">
+                                    <span class="text-gray-900 font-semibold text-sm">3. Qualification Match</span>
+                                    <p class="text-xs text-gray-600 mt-1">Binary educational requirement check</p>
+                                </div>
+                                <span class="text-gray-900 font-bold" id="degreeScoreDisplay">1.0</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                                <div id="degreeBar" class="bg-indigo-700 h-2 rounded-full" style="width: 100%"></div>
+                            </div>
+                            <div class="text-xs text-gray-600 bg-gray-50 p-3 rounded-xl mt-2">
+                                <strong>What this means:</strong>
+                                <span id="degreeExplanation">Your degree qualifies you for this role. The algorithm returns <strong>1.0</strong> (match) or <strong>0.0</strong> (no match) - this is a binary pass/fail check, not a percentage.</span>
+                            </div>
+                            <div class="text-xs text-gray-700 mt-2">
+                                <strong>Weight in final score:</strong> 10% (acts as minimum qualification gate)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 p-4 bg-violet-50 rounded-2xl border border-violet-200">
+                        <div class="text-xs text-gray-700 font-semibold mb-3">Final Score Calculation:</div>
+
+                        <div class="calc-box mb-3">
+                            <div class="text-xs text-gray-600 mb-2 font-mono">final_score =</div>
+                            <div class="text-sm font-mono text-gray-800 space-y-1 pl-4">
+                                <div>(0.55 × <span id="calcText" class="text-violet-600 font-bold">0.55</span>)</div>
+                                <div>+ (0.35 × <span id="calcSkill" class="text-indigo-500 font-bold">0.60</span>)</div>
+                                <div>+ (0.10 × <span id="calcDegree" class="text-indigo-700 font-bold">1</span>)</div>
+                                <div class="border-t border-gray-300 mt-2 pt-2">
+                                    = <span id="calcFinal" class="font-bold text-violet-700 text-lg">0.96</span>
+                                    or <span class="font-bold text-violet-700 text-lg">96%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-xs text-gray-700 space-y-2">
+                            <div class="flex items-start">
+                                <span class="font-semibold mr-2 min-w-[120px]">Text Similarity:</span>
+                                <span>TF-IDF cosine similarity (0.0 - 1.0 scale)</span>
+                            </div>
+                            <div class="flex items-start">
+                                <span class="font-semibold mr-2 min-w-[120px]">Skills Match:</span>
+                                <span>Jaccard: matched ÷ total_required</span>
+                            </div>
+                            <div class="flex items-start">
+                                <span class="font-semibold mr-2 min-w-[120px]">Degree Match:</span>
+                                <span><strong>Binary:</strong> 1 if match, 0 otherwise</span>
+                            </div>
+                        </div>
+
+                        <div class="text-xs text-gray-600 mt-4 pt-3 border-t border-gray-200">
+                            <strong>Algorithm:</strong> Weighted linear combination using TF-IDF vectorization (n-grams 1-2), set intersection for skills, and normalized substring matching for degrees.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+    <script>
+        let job = {};
+
+        window.onload = function () {
+            if (!checkLogin()) return;
+            initNav();
+            loadJobDetails();
+        };
+
+        function loadJobDetails() {
+            const jobId = parseInt(localStorage.getItem('selectedJobId'));
+            const allJobs = JSON.parse(localStorage.getItem('jobResults') || '[]');
+
+            // Find the job from stored results
+            job = allJobs.find(j => j.job_id === jobId);
+
+            if (!job) {
+                document.body.innerHTML = `
+                    <div style="text-align:center;padding:4rem;font-family:'Plus Jakarta Sans',sans-serif">
+                        <p style="font-size:1rem;color:#8b92ae;margin-bottom:1rem">Previous session has ended. Job not found.</p>
+                        <a href="/saved-jobs" style="color:#667eea;font-weight:600">← Back to Saved Jobs</a>
+                    </div>`;
+                return;
+            }
+
+            // Populate the page
+            document.getElementById('jobTitle').textContent       = job.job_title || '—';
+            document.getElementById('companyName').textContent    = job.company_name || '—';
+            document.getElementById('location').textContent       = job.location || '—';
+            document.getElementById('salary').textContent         = job.salary || formatSalaryRange(job.min_salary, job.max_salary);
+            document.getElementById('employmentType').textContent = job.employment_type || '—';
+            document.getElementById('experienceLevel').textContent = job.experience_level || '—';
+            document.getElementById('industry').textContent       = job.industry || '—';
+            document.getElementById('matchScore').textContent     = `${Math.round((job.final_score || 0) * 100)}%`;
+            document.getElementById('degreesAccepted').textContent = job.degrees_accepted || '—';
+            document.getElementById('experienceReq').textContent  = job.experience_level || '—';
+            document.getElementById('jobDescription').innerHTML   = `<p>${job.job_description || '—'}</p>`;
+
+            // Required skills
+            const skills = parseSkills(job.required_skills);
+            document.getElementById('requiredSkillsList').innerHTML = skills.map(skill =>
+                `<span class="skill-badge">${skill}</span>`
+            ).join('');
+
+            // Match score breakdown
+            const textSim  = job.text_similarity || 0;
+            const skillSc  = job.skill_score || 0;
+            const degreeSc = job.degree_score || 0;
+
+            document.getElementById('textScore').textContent        = `${(textSim * 100).toFixed(0)}%`;
+            document.getElementById('textScorePercent').textContent = `${(textSim * 100).toFixed(0)}%`;
+            document.getElementById('skillScore').textContent       = `${(skillSc * 100).toFixed(0)}%`;
+            document.getElementById('degreeScoreDisplay').textContent = degreeSc.toFixed(1);
+
+            document.getElementById('textBar').style.width   = `${textSim * 100}%`;
+            document.getElementById('skillBar').style.width  = `${skillSc * 100}%`;
+            document.getElementById('degreeBar').style.width = `${degreeSc * 100}%`;
+
+            document.getElementById('matchedSkillCount').textContent = (job.matched_skills || []).length;
+            document.getElementById('totalSkillCount').textContent   = skills.length;
+
+            document.getElementById('calcText').textContent   = textSim.toFixed(2);
+            document.getElementById('calcSkill').textContent  = skillSc.toFixed(2);
+            document.getElementById('calcDegree').textContent = degreeSc.toFixed(0);
+            document.getElementById('calcFinal').textContent  = (job.final_score || 0).toFixed(2);
+
+            // Matched skills list
+            document.getElementById('matchedSkills').innerHTML = (job.matched_skills || []).map(skill => `
+                <div class="flex items-center text-sm">
+                    <svg class="w-5 h-5 text-green-600 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <span>${skill}</span>
+                </div>
+            `).join('');
+
+            // Missing skills list
+            document.getElementById('missingSkills').innerHTML = (job.missing_skills || []).map(skill => `
+                <div class="flex items-center text-sm">
+                    <svg class="w-5 h-5 text-gray-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    <span class="text-gray-600">${skill}</span>
+                </div>
+            `).join('');
+
+            // Degree match status
+            const degreeOk = job.degree_match === 'Yes';
+            document.getElementById('degreeMatchStatus').innerHTML = degreeOk ? `
+                <svg class="w-6 h-6 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span class="font-medium">Your degree matches this role</span>
+            ` : `
+                <svg class="w-6 h-6 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span class="text-gray-600">Degree requirements not fully met</span>
+            `;
+
+            document.getElementById('degreeExplanation').innerHTML = degreeOk
+                ? `Your degree qualifies you for this role.`
+                : `Your degree does not match. This reduces your overall score by up to 10%.`;
+
+            // Save button state
+            updateSaveBtn(isJobSaved(job.job_id));
+        }
+
+        function toggleSaveJob() {
+            const savedJobs = JSON.parse(localStorage.getItem('savedJobs') || '[]');
+            const alreadySaved = savedJobs.some(j => Number(j.job_id) === Number(job.job_id));
+
+            if (alreadySaved) {
+                const updated = savedJobs.filter(j => Number(j.job_id) !== Number(job.job_id));
+                localStorage.setItem('savedJobs', JSON.stringify(updated));
+                updateSaveBtn(false);
+            } else {
+                savedJobs.push(job);
+                localStorage.setItem('savedJobs', JSON.stringify(savedJobs));
+                updateSaveBtn(true);
+            }
+        }
+
+        function updateSaveBtn(isSaved) {
+            const btn = document.getElementById('saveBtn');
+
+            if (isSaved) {
+                btn.textContent = '✓ Saved';
+                btn.style.borderColor = '#8b5cf6';
+                btn.style.color = '#6d28d9';
+                btn.style.background = '#f5f3ff';
+            } else {
+                btn.textContent = 'Save Job';
+                btn.style.borderColor = '';
+                btn.style.color = '';
+                btn.style.background = '';
+            }
+        }
+
+        function shareJob() {
+            const title = document.getElementById('jobTitle').textContent;
+            const company = document.getElementById('companyName').textContent;
+            const text = `${title} at ${company} — found on MarketMatch`;
+
+            if (navigator.share) {
+                navigator.share({
+                    title: title,
+                    text: text,
+                    url: window.location.href
+                });
+            } else {
+                navigator.clipboard.writeText(text);
+                alert('Job details copied to clipboard.');
+            }
+        }
+
+        async function applyNow() {
+            const title   = document.getElementById('jobTitle').textContent;
+            const company = document.getElementById('companyName').textContent;
+            const btn     = document.getElementById('applyBtn');
+
+            btn.textContent = 'Finding application...';
+            btn.disabled    = true;
+
+            try {
+                const res  = await fetch(`/api/live-jobs?q=${encodeURIComponent(title + ' ' + company)}`);
+                const data = await res.json();
+
+                if (data.success && data.results.length > 0) {
+                    const url = data.results[0].redirect_url;
+                    window.open(url, '_blank');
+                } else {
+                    // Fallback — search Adzuna directly
+                    const searchUrl = `https://www.adzuna.co.uk/search?q=${encodeURIComponent(title)}`;
+                    window.open(searchUrl, '_blank');
+                }
+            } catch (err) {
+                // Fallback if API fails
+                const searchUrl = `https://www.adzuna.co.uk/search?q=${encodeURIComponent(title)}`;
+                window.open(searchUrl, '_blank');
+            } finally {
+                btn.textContent = 'Apply Now';
+                btn.disabled    = false;
+            }
+        }
+    </script>
+</body>
+</html>

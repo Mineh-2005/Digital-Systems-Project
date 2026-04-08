@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard — MarketMatch</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet" />
+    <style>
+        .gradient-text {
+            background: linear-gradient(135deg, var(--violet), var(--purple));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .gradient-btn {
+            background: linear-gradient(135deg, var(--violet) 0%, var(--purple) 100%);
+            color: white; border: none; cursor: pointer;
+            transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(102,126,234,0.3);
+        }
+        .gradient-btn:hover {
+            opacity: 0.92; transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(102,126,234,0.4);
+        }
+        .card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: rgba(102,126,234,0.25);
+        }
+        .stat-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.5rem;
+            position: relative; overflow: hidden;
+            transition: transform 0.25s, box-shadow 0.25s;
+        }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+        .stat-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            border-radius: 14px 14px 0 0;
+        }
+        .stat-card.violet::before { background: linear-gradient(90deg, var(--violet), var(--violet-lt)); }
+        .stat-card.purple::before { background: linear-gradient(90deg, var(--purple), var(--purple-lt)); }
+        .stat-card.green::before  { background: linear-gradient(90deg, #34d399, #6ee7b7); }
+        .stat-card.sky::before    { background: linear-gradient(90deg, #60a5fa, #818cf8); }
+        .skill-chip {
+            display: inline-flex; align-items: center;
+            padding: 0.3rem 0.85rem;
+            background: var(--violet-pale);
+            border: 1px solid rgba(102,126,234,0.2);
+            border-radius: 100px;
+            font-size: 0.75rem; font-weight: 600;
+            color: var(--violet);
+            transition: background 0.2s, transform 0.2s;
+        }
+        .skill-chip:hover { background: rgba(102,126,234,0.15); transform: translateY(-1px); }
+        .quick-action {
+            display: flex; align-items: center; gap: 1rem;
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--white);
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, transform 0.2s;
+            text-decoration: none; color: inherit;
+        }
+        .quick-action:hover {
+            background: var(--violet-pale);
+            border-color: rgba(102,126,234,0.25);
+            transform: translateX(4px);
+        }
+        .qa-icon {
+            width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .qa-icon svg { width: 20px; height: 20px; }
+        .activity-row {
+            display: flex; align-items: center; gap: 0.875rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .activity-row:last-child { border-bottom: none; }
+        .activity-dot {
+            width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+        }
+        .fade-in { animation: fadeInUp 0.5s ease both; }
+        .fade-in-1 { animation: fadeInUp 0.5s 0.05s ease both; }
+        .fade-in-2 { animation: fadeInUp 0.5s 0.1s ease both; }
+        .fade-in-3 { animation: fadeInUp 0.5s 0.15s ease both; }
+        .fade-in-4 { animation: fadeInUp 0.5s 0.2s ease both; }
+        .fade-in-5 { animation: fadeInUp 0.5s 0.25s ease both; }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        /* Nav */
+        .logo-mark svg { width: 15px; height: 15px; color: white; }
+        .nav-link:hover { background: var(--violet-pale); color: var(--violet); }
+        .nav-link.active { background: var(--violet-pale); color: var(--violet); font-weight: 600; }
+        
+        .progress-bar {
+            height: 6px; background: #f0f2f9; border-radius: 100px; overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%; border-radius: 100px;
+            background: linear-gradient(90deg, var(--violet), var(--purple));
+            transition: width 1s cubic-bezier(.22,.61,.36,1);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAV Bar -->
+    <nav class="mm-nav" id="mmNav">
+        <div class="mm-nav-inner">
+            <a href="/dashboard" class="mm-logo">
+                <div class="mm-logo-mark">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                    </svg>
+                </div>
+                MarketMatch
+            </a>
+
+            <div class="mm-nav-links">
+                <a href="/dashboard" class="mm-nav-link active">Dashboard</a>
+                <a href="/upload" class="mm-nav-link">Upload CV</a>
+                <a href="/results" class="mm-nav-link">Jobs</a>
+                <a href="/saved-jobs" class="mm-nav-link">Saved Jobs</a>
+                <a href="/admin" id="adminNavLink" class="mm-nav-link" style="display:none;color:var(--purple);font-weight:700">Admin</a>
+            </div>
+
+            <div class="mm-nav-right">
+                <a href="/profile" id="navGreeting" class="mm-nav-greeting">Welcome, [Name]!</a>
+                <button onclick="logout()" class="mm-logout-btn">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN -->
+    <main style="max-width:1200px;margin:0 auto;padding:2.5rem 2rem 4rem">
+
+        <!-- Welcome Header -->
+        <div class="fade-in" style="margin-bottom:2.5rem">
+            <p style="font-size:0.8rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:0.4rem">
+                Welcome back
+            </p>
+            <h1 style="font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;letter-spacing:-0.5px;line-height:1.2">
+                <span id="welcomeName">there</span>,
+                <span class="gradient-text" style="font-family:'Lora',serif;font-style:italic;font-weight:400"> ready to find your next role?</span>
+            </h1>
+        </div>
+
+        <!-- STATS ROW -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.25rem;margin-bottom:2rem">
+            <div class="stat-card violet fade-in-1">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+                    <span style="font-size:0.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Jobs Matched</span>
+                    <div style="width:32px;height:32px;border-radius:8px;background:var(--violet-pale);display:flex;align-items:center;justify-content:center">
+                        <svg width="16" height="16" fill="none" stroke="var(--violet)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    </div>
+                </div>
+                <div style="font-size:2rem;font-weight:800;color:var(--text);line-height:1" id="statMatched">—</div>
+                <div style="font-size:0.75rem;color:var(--muted);margin-top:0.3rem">from your last search</div>
+            </div>
+
+            <div class="stat-card purple fade-in-2">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+                    <span style="font-size:0.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Top Match</span>
+                    <div style="width:32px;height:32px;border-radius:8px;background:rgba(118,75,162,0.08);display:flex;align-items:center;justify-content:center">
+                        <svg width="16" height="16" fill="none" stroke="var(--purple)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+                    </div>
+                </div>
+                <div style="font-size:2rem;font-weight:800;color:var(--text);line-height:1" id="statTopMatch">—</div>
+                <div style="font-size:0.75rem;color:var(--muted);margin-top:0.3rem">best score this session</div>
+            </div>
+
+            <div class="stat-card green fade-in-3">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+                    <span style="font-size:0.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Saved Jobs</span>
+                    <div style="width:32px;height:32px;border-radius:8px;background:rgba(52,211,153,0.1);display:flex;align-items:center;justify-content:center">
+                        <svg width="16" height="16" fill="none" stroke="#059669" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+                    </div>
+                </div>
+                <div style="font-size:2rem;font-weight:800;color:var(--text);line-height:1" id="statSaved">0</div>
+                <div style="font-size:0.75rem;color:var(--muted);margin-top:0.3rem">jobs bookmarked</div>
+            </div>
+
+            <div class="stat-card sky fade-in-4">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+                    <span style="font-size:0.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Skills on Profile</span>
+                    <div style="width:32px;height:32px;border-radius:8px;background:rgba(96,165,250,0.1);display:flex;align-items:center;justify-content:center">
+                        <svg width="16" height="16" fill="none" stroke="#60a5fa" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                    </div>
+                </div>
+                <div style="font-size:2rem;font-weight:800;color:var(--text);line-height:1" id="statSkills">0</div>
+                <div style="font-size:0.75rem;color:var(--muted);margin-top:0.3rem">detected from your CV</div>
+            </div>
+        </div>
+
+        <!-- TWO COLUMN LAYOUT -->
+        <div style="display:grid;grid-template-columns:1fr 340px;gap:1.5rem;align-items:start">
+
+            <!-- LEFT COLUMN -->
+            <div style="display:flex;flex-direction:column;gap:1.5rem">
+
+                <!-- Profile Summary Card -->
+                <div class="card fade-in-2" style="padding:1.75rem">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+                        <h2 style="font-size:1rem;font-weight:700;color:var(--text)">Your Profile</h2>
+                        <a href="/profile" style="font-size:0.78rem;font-weight:600;color:var(--violet);text-decoration:none;transition:opacity 0.2s" onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=1">
+                            Edit profile →
+                        </a>
+                    </div>
+
+                    <!-- No profile state -->
+                    <div id="noProfileState" class="hidden" style="text-align:center;padding:2rem 1rem">
+                        <div style="width:52px;height:52px;border-radius:14px;background:var(--violet-pale);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
+                            <svg width="26" height="26" fill="none" stroke="var(--violet)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        </div>
+                        <p style="font-size:0.9rem;font-weight:600;color:var(--text);margin-bottom:0.4rem">Upload your CV to get personalised job matches</p>
+                        <a href="/upload" class="gradient-btn" style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.6rem 1.5rem;border-radius:10px;font-size:0.85rem;font-weight:700;text-decoration:none">
+                            Upload CV
+                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                        </a>
+                    </div>
+
+                    <!-- Has profile state -->
+                    <div id="hasProfileState" class="hidden">
+                        <div id="cvStatus" style="margin-bottom:1.25rem"></div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.5rem">
+                            <div style="background:var(--bg);border-radius:10px;padding:1rem">
+                                <p style="font-size:0.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.4rem">Degree</p>
+                                <p style="font-size:0.9rem;font-weight:700;color:var(--text)" id="profileDegreeDisplay">—</p>
+                            </div>
+                            <div style="background:var(--bg);border-radius:10px;padding:1rem">
+                                <p style="font-size:0.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.4rem">Skills Count</p>
+                                <p style="font-size:0.9rem;font-weight:700;color:var(--text)" id="profileSkillCount">—</p>
+                            </div>
+                        </div>
+                        <div>
+                            <p style="font-size:0.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.75rem">Skills on Profile</p>
+                            <div id="profileSkillsDisplay" style="display:flex;flex-wrap:wrap;gap:0.5rem"></div>
+                        </div>
+
+                        <!-- Profile completeness -->
+                        <div style="margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--border)">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem">
+                                <span style="font-size:0.78rem;font-weight:600;color:var(--text-sm)">Profile completeness</span>
+                                <span style="font-size:0.78rem;font-weight:700;color:var(--violet)" id="completenessLabel">0%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="completenessBar" style="width:0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="card fade-in-3" style="padding:1.75rem">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+                        <h2 style="font-size:1rem;font-weight:700;color:var(--text)">Recent Activity</h2>
+                        <span style="font-size:0.72rem;color:var(--muted)" id="lastUpdated">—</span>
+                    </div>
+                    <div id="activityList">
+                        <div style="text-align:center;padding:2rem 1rem">
+                            <p style="font-size:0.85rem;color:var(--muted)">No activity yet — upload your CV to get started.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <div style="display:flex;flex-direction:column;gap:1.5rem">
+
+                <!-- Quick Actions -->
+                <div class="card fade-in-2" style="padding:1.75rem">
+                    <h2 style="font-size:1rem;font-weight:700;color:var(--text);margin-bottom:1.25rem">Quick Actions</h2>
+                    <div style="display:flex;flex-direction:column;gap:0.6rem">
+                        <a href="/upload" class="quick-action">
+                            <div class="qa-icon" style="background:var(--violet-pale)">
+                                <svg fill="none" stroke="var(--violet)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                            </div>
+                            <div>
+                                <p style="font-size:0.875rem;font-weight:700;color:var(--text)">Upload / Update CV</p>
+                                <p style="font-size:0.75rem;color:var(--muted)">Refresh your profile</p>
+                            </div>
+                        </a>
+                        <a href="/results" class="quick-action">
+                            <div class="qa-icon" style="background:rgba(118,75,162,0.08)">
+                                <svg fill="none" stroke="var(--purple)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            </div>
+                            <div>
+                                <p style="font-size:0.875rem;font-weight:700;color:var(--text)">Browse Matched Jobs</p>
+                                <p style="font-size:0.75rem;color:var(--muted)">See your recommendations</p>
+                            </div>
+                        </a>
+                        <a href="/saved-jobs" class="quick-action">
+                            <div class="qa-icon" style="background:rgba(52,211,153,0.1)">
+                                <svg fill="none" stroke="#059669" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+                            </div>
+                            <div>
+                                <p style="font-size:0.875rem;font-weight:700;color:var(--text)">Saved Jobs</p>
+                                <p style="font-size:0.75rem;color:var(--muted)">Review bookmarked roles</p>
+                            </div>
+                        </a>
+                        <a href="/profile" class="quick-action">
+                            <div class="qa-icon" style="background:rgba(96,165,250,0.1)">
+                                <svg fill="none" stroke="#60a5fa" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                            </div>
+                            <div>
+                                <p style="font-size:0.875rem;font-weight:700;color:var(--text)">Edit Profile</p>
+                                <p style="font-size:0.75rem;color:var(--muted)">Update degree & skills</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Market Snapshot -->
+                <div class="card fade-in-3" style="padding:1.75rem">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+                        <h2 style="font-size:1rem;font-weight:700;color:var(--text)">Market Snapshot</h2>
+                        <span style="font-size:0.65rem;font-weight:600;padding:0.2rem 0.5rem;border-radius:100px;background:rgba(52,211,153,0.1);color:#059669">Live</span>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:0.875rem">
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:0.875rem;border-bottom:1px solid var(--border)">
+                            <span style="font-size:0.82rem;color:var(--text-sm);font-weight:500">Active UK listings</span>
+                            <span style="font-size:0.85rem;font-weight:800;color:var(--violet)">52,400</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:0.875rem;border-bottom:1px solid var(--border)">
+                            <span style="font-size:0.82rem;color:var(--text-sm);font-weight:500">Avg tech salary</span>
+                            <span style="font-size:0.85rem;font-weight:800;color:var(--purple)">£54,200</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:0.875rem;border-bottom:1px solid var(--border)">
+                            <span style="font-size:0.82rem;color:var(--text-sm);font-weight:500">AI/ML growth (6mo)</span>
+                            <span style="font-size:0.85rem;font-weight:800;color:#059669">+18%</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;align-items:center">
+                            <span style="font-size:0.82rem;color:var(--text-sm);font-weight:500">Retail & admin YoY</span>
+                            <span style="font-size:0.85rem;font-weight:800;color:#dc2626">−12%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tip Card -->
+                <div style="background:linear-gradient(135deg,var(--violet),var(--purple));border-radius:16px;padding:1.5rem;color:white" class="fade-in-4">
+                    <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;margin-bottom:1rem">
+                        <svg width="18" height="18" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <p style="font-size:0.82rem;font-weight:700;opacity:0.75;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.4rem">Tip</p>
+                    <p style="font-size:0.875rem;line-height:1.6;opacity:0.92" id="tipText">
+                        Adding more skills to your profile increases your match score. Try updating your CV with recent projects.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    
+    <script>
+        const tips = [
+            "Adding more skills to your profile increases your match score. Try updating your CV with recent projects.",
+            "Jobs with a 70%+ match score are worth applying to — don't wait for 90%+.",
+            "Salary filters work best set to your minimum acceptable range, not your ideal.",
+            "Saving jobs lets you compare roles side by side before committing to an application.",
+            "Regularly updating your CV keeps your matches fresh as the market changes.",
+        ];
+
+        window.onload = function () {
+            if (!checkLogin()) return;
+            initNav();
+
+            const name = localStorage.getItem('userName') || 'there';
+            document.getElementById('welcomeName').textContent = name.split(' ')[0];
+
+            if (!localStorage.getItem('userLoggedIn')) {
+                window.location.href = '/login';
+                return;
+            }
+
+            const email  = localStorage.getItem('userEmail') || '';
+            const profile = JSON.parse(localStorage.getItem('userProfile') || 'null');
+            const saved  = JSON.parse(localStorage.getItem('savedJobs') || '[]');
+
+            // Welcome name
+            if (name) {
+                document.getElementById('welcomeName').textContent = name.split(' ')[0];
+            }
+
+            // Saved jobs count
+            document.getElementById('statSaved').textContent = saved.length;
+
+            // Random tip
+            document.getElementById('tipText').textContent = tips[Math.floor(Math.random() * tips.length)];
+
+            // Last updated
+            document.getElementById('lastUpdated').textContent = 'Today, ' + new Date().toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
+
+            const cvUploaded = localStorage.getItem('cvUploaded') === 'true';
+            const cvFileName = localStorage.getItem('cvFileName') || '';
+
+            if (profile) {
+                showProfile(profile, saved, cvUploaded, cvFileName);
+            } else {
+                document.getElementById('noProfileState').classList.remove('hidden');
+                document.getElementById('statMatched').textContent = '—';
+                document.getElementById('statTopMatch').textContent = '—';
+                document.getElementById('statSkills').textContent = '0';
+                showActivity([
+                    { text: 'Account created', sub: 'Welcome to MarketMatch', color: '#667eea' },
+                ]);
+            }
+        };
+
+        function showProfile(profile, saved, cvUploaded, cvFileName) {
+            document.getElementById('noProfileState').classList.add('hidden');
+
+            // CV status badge
+            const cvStatus = document.getElementById('cvStatus');
+            if (cvStatus) {
+                cvStatus.innerHTML = cvUploaded
+                    ? `<div style="display:flex;align-items:center;gap:0.5rem;padding:0.6rem 0.875rem;background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.2);border-radius:8px;font-size:0.8rem;font-weight:600;color:#059669">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        CV uploaded — ${cvFileName}
+                    </div>`
+                    : `<div style="display:flex;align-items:center;gap:0.5rem;padding:0.6rem 0.875rem;background:var(--violet-pale);border:1px solid rgba(102,126,234,0.2);border-radius:8px;font-size:0.8rem;font-weight:600;color:var(--violet)">
+                        Manual input used
+                    </div>`;
+            }
+
+            document.getElementById('hasProfileState').classList.remove('hidden');
+
+            // Degree
+            document.getElementById('profileDegreeDisplay').textContent = profile.degree || 'Not specified';
+
+            // Skills
+            const skills = Array.isArray(profile.skills)
+                ? profile.skills
+                : typeof profile.skills === 'string'
+                    ? profile.skills.split(',').map(s => s.trim()).filter(Boolean)
+                    : [];
+                    
+            document.getElementById('statSkills').textContent    = skills.length;
+            document.getElementById('profileSkillCount').textContent = skills.length + ' skills';
+
+            const skillsContainer = document.getElementById('profileSkillsDisplay');
+            skillsContainer.innerHTML = '';
+            skills.slice(0, 8).forEach(s => {
+                const chip = document.createElement('span');
+                chip.className = 'skill-chip';
+                chip.textContent = s;
+                skillsContainer.appendChild(chip);
+            });
+            if (skills.length > 8) {
+                const more = document.createElement('span');
+                more.className = 'skill-chip';
+                more.style.background = '#f0f2f9';
+                more.style.color = 'var(--muted)';
+                more.textContent = `+${skills.length - 8} more`;
+                skillsContainer.appendChild(more);
+            }
+
+            // Completeness
+            let score = 0;
+            if (profile.degree && profile.degree !== 'Not specified') score += 40;
+            if (skills.length >= 1)  score += 20;
+            if (skills.length >= 3)  score += 20;
+            if (skills.length >= 6)  score += 20;
+            document.getElementById('completenessLabel').textContent = score + '%';
+            setTimeout(() => {
+                document.getElementById('completenessBar').style.width = score + '%';
+            }, 300);
+
+            // Stats from last search
+            const lastResults = JSON.parse(localStorage.getItem('lastResults') || 'null');
+            const jobResults = JSON.parse(localStorage.getItem('jobResults') || '[]');
+
+            if (lastResults) {
+                document.getElementById('statMatched').textContent = lastResults.count || '—';
+                document.getElementById('statTopMatch').textContent = lastResults.topScore ? lastResults.topScore + '%' : '—';
+            } else if (jobResults.length) {
+                document.getElementById('statMatched').textContent = jobResults.length;
+                const topScore = Math.max(...jobResults.map(j => Number(j.final_score || 0)));
+                document.getElementById('statTopMatch').textContent = topScore ? Math.round(topScore * 100) + '%' : '—';
+            } else {
+                document.getElementById('statMatched').textContent = '—';
+                document.getElementById('statTopMatch').textContent = '—';
+            }
+
+            // Activity
+            const activities = [];
+            if (profile.degree) activities.push({ text: 'Degree extracted', sub: profile.degree, color: '#667eea' });
+            if (skills.length)  activities.push({ text: `${skills.length} skills detected`, sub: skills.slice(0,3).join(', ') + (skills.length > 3 ? '...' : ''), color: '#764ba2' });
+            if (saved.length)   activities.push({ text: `${saved.length} job${saved.length > 1 ? 's' : ''} saved`, sub: 'View in Saved Jobs', color: '#059669' });
+            activities.push({ text: 'Profile ready', sub: 'You can now browse matched jobs', color: '#60a5fa' });
+            showActivity(activities);
+        }
+
+        function showActivity(items) {
+            const list = document.getElementById('activityList');
+            list.innerHTML = '';
+            items.forEach(item => {
+                const row = document.createElement('div');
+                row.className = 'activity-row';
+                row.innerHTML = `
+                    <div class="activity-dot" style="background:${item.color}"></div>
+                    <div style="flex:1;min-width:0">
+                        <p style="font-size:0.85rem;font-weight:600;color:var(--text)">${item.text}</p>
+                        <p style="font-size:0.75rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${item.sub}</p>
+                    </div>`;
+                list.appendChild(row);
+            });
+        }
+    </script>
+</body>
+</html>

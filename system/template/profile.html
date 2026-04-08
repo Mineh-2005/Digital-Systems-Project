@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Profile — MarketMatch</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet" />
+    <style>
+        .card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.75rem;
+        }
+        .card-title {
+            font-size: 1rem; font-weight: 700; color: var(--text);
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .input-field {
+            width: 100%; padding: 0.75rem 1rem;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.9rem; color: var(--text);
+            background: white; outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .input-field:focus {
+            border-color: var(--violet);
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.12);
+        }
+        .input-field:disabled {
+            background: var(--bg); color: var(--muted); cursor: not-allowed;
+        }
+        .input-field::placeholder { color: var(--muted); }
+        .gradient-btn {
+            background: linear-gradient(135deg, var(--violet) 0%, var(--purple) 100%);
+            color: white; border: none; cursor: pointer;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 700; border-radius: 10px;
+            transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(102,126,234,0.25);
+        }
+        .gradient-btn:hover {
+            opacity: 0.92; transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(102,126,234,0.35);
+        }
+        .outline-btn {
+            background: white; color: var(--violet);
+            border: 1.5px solid var(--border-md);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 600; border-radius: 10px; cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, transform 0.2s;
+        }
+        .outline-btn:hover {
+            background: var(--violet-pale);
+            border-color: rgba(102,126,234,0.3);
+            transform: translateY(-1px);
+        }
+        .skill-tag {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            padding: 0.35rem 0.85rem;
+            background: var(--violet-pale);
+            border: 1px solid rgba(102,126,234,0.2);
+            border-radius: 100px;
+            font-size: 0.78rem; font-weight: 600; color: var(--violet);
+            transition: background 0.2s;
+        }
+        .skill-tag button {
+            background: none; border: none; cursor: pointer;
+            color: var(--muted); line-height: 1; font-size: 0.85rem;
+            transition: color 0.15s; padding: 0;
+        }
+        .skill-tag button:hover { color: #ef4444; }
+        .skill-tag.disabled button { display: none; }
+        .progress-bar {
+            height: 8px; background: var(--bg);
+            border-radius: 100px; overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%; border-radius: 100px;
+            background: linear-gradient(90deg, var(--violet), var(--purple));
+            transition: width 1s cubic-bezier(.22,.61,.36,1);
+        }
+        .section-label {
+            font-size: 0.72rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1px;
+            color: var(--muted); margin-bottom: 0.6rem;
+        }
+        .toast {
+            position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(80px);
+            background: var(--text); color: white;
+            padding: 0.75rem 1.5rem; border-radius: 100px;
+            font-size: 0.85rem; font-weight: 600;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+            transition: transform 0.35s cubic-bezier(.22,.61,.36,1), opacity 0.35s;
+            opacity: 0; z-index: 999; white-space: nowrap;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast.success { background: linear-gradient(135deg, #059669, #34d399); }
+        .toast.error   { background: linear-gradient(135deg, #dc2626, #f87171); }
+        .danger-zone {
+            border: 1px solid #fecaca;
+            border-radius: 12px; padding: 1.25rem 1.5rem;
+            background: #fef2f2;
+        }
+        .fade-in   { animation: fadeInUp 0.4s ease both; }
+        .fade-in-1 { animation: fadeInUp 0.4s 0.06s ease both; }
+        .fade-in-2 { animation: fadeInUp 0.4s 0.12s ease both; }
+        .fade-in-3 { animation: fadeInUp 0.4s 0.18s ease both; }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .input-focus:focus {
+            outline: none;
+            border-color: var(--violet);
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.12);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAV -->
+    <nav class="mm-nav" id="mmNav">
+        <div class="mm-nav-inner">
+            <a href="/dashboard" class="mm-logo">
+                <div class="mm-logo-mark">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                    </svg>
+                </div>
+                MarketMatch
+            </a>
+
+            <div class="mm-nav-links">
+                <a href="/dashboard" class="mm-nav-link">Dashboard</a>
+                <a href="/upload" class="mm-nav-link">Upload CV</a>
+                <a href="/results" class="mm-nav-link">Jobs</a>
+                <a href="/saved-jobs" class="mm-nav-link">Saved Jobs</a>
+                <a href="/admin" id="adminNavLink" class="mm-nav-link" style="display:none;color:var(--purple);font-weight:700">Admin</a>
+            </div>
+
+            <div class="mm-nav-right">
+                <a href="/profile" id="navGreeting" class="mm-nav-greeting">Welcome, [Name]!</a>
+                <button onclick="logout()" class="mm-logout-btn">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN -->
+    <main style="max-width:1100px;margin:0 auto;padding:2.5rem 2rem 4rem">
+
+        <!-- Page Header -->
+        <div class="fade-in" style="margin-bottom:2rem">
+            <p style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:0.35rem">Account</p>
+            <h1 style="font-size:clamp(1.4rem,3vw,2rem);font-weight:800;letter-spacing:-0.5px;color:var(--text)">My Profile</h1>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 300px;gap:1.5rem;align-items:start">
+
+            <!-- LEFT COLUMN -->
+            <div style="display:flex;flex-direction:column;gap:1.5rem">
+
+                <!-- ── PERSONAL DETAILS ── -->
+                <div class="card fade-in-1">
+                    <div class="card-title">
+                        Personal Details
+                        <button id="editPersonalBtn" onclick="toggleEditPersonal()"
+                            class="outline-btn" style="font-size:0.78rem;padding:0.35rem 0.875rem">
+                            Edit
+                        </button>
+                    </div>
+
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem">
+                        <div>
+                            <p class="section-label">First Name</p>
+                            <input type="text" id="fieldFirstName" class="input-field" disabled>
+                        </div>
+                        <div>
+                            <p class="section-label">Last Name</p>
+                            <input type="text" id="fieldLastName" class="input-field" disabled>
+                        </div>
+                        <div style="grid-column:1/-1">
+                            <p class="section-label">Email Address</p>
+                            <input type="email" id="fieldEmail" class="input-field" disabled>
+                        </div>
+                    </div>
+
+                    <div id="personalActions" style="display:none;gap:0.75rem;margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--border)">
+                        <button onclick="savePersonal()" class="gradient-btn" style="padding:0.6rem 1.5rem;font-size:0.85rem">
+                            Save Changes
+                        </button>
+                        <!-- <button onclick="cancelEditPersonal()" class="outline-btn" style="padding:0.6rem 1.25rem;font-size:0.85rem">
+                            Cancel
+                        </button> -->
+                    </div>
+                </div>
+
+                <!-- ── CV PROFILE ── -->
+                <div class="card fade-in-2">
+                    <div class="card-title">
+                        CV Profile
+                        <a href="/upload" style="font-size:0.78rem;font-weight:600;color:var(--violet);text-decoration:none;padding:0.35rem 0.875rem;border-radius:8px;border:1.5px solid var(--border-md);background:white;transition:all 0.2s"
+                            onmouseover="this.style.background='var(--violet-pale)';this.style.borderColor='rgba(102,126,234,0.3)'"
+                            onmouseout="this.style.background='white';this.style.borderColor='var(--border-md)'">
+                            Re-upload CV
+                        </a>
+                    </div>
+
+                    <!-- No CV state -->
+                    <div id="noCVState" style="display:none;text-align:center;padding:2rem 1rem">
+                        <div style="width:48px;height:48px;border-radius:14px;background:var(--violet-pale);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
+                            <svg width="22" height="22" fill="none" stroke="var(--violet)" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                        <p style="font-size:0.9rem;font-weight:600;color:var(--text);margin-bottom:0.4rem">No CV uploaded yet</p>
+                        <p style="font-size:0.8rem;color:var(--muted);margin-bottom:1.25rem">Upload your CV to extract your degree and skills automatically</p>
+                        <a href="/upload" class="gradient-btn"
+                            style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.6rem 1.5rem;border-radius:10px;font-size:0.85rem;text-decoration:none">
+                            Upload CV
+                        </a>
+                    </div>
+
+                    <!-- Has CV state -->
+                    <div id="hasCVState" style="display:none">
+
+                        <!-- Degree -->
+                        <div style="margin-bottom:1.5rem">
+                            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem">
+                                <p class="section-label" style="margin:0">Degree / Qualification</p>
+                                <button onclick="toggleEditDegree()" id="editDegreeBtn"
+                                    style="font-size:0.75rem;font-weight:600;color:var(--violet);background:none;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:opacity 0.2s"
+                                    onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=1">
+                                    Edit
+                                </button>
+                            </div>
+                            <!-- Display -->
+                            <div id="degreeDisplay" style="font-size:0.95rem;font-weight:700;color:var(--text);padding:0.75rem 1rem;background:var(--bg);border-radius:10px"></div>
+                            <!-- Edit input -->
+                            <div id="degreeEdit" style="display:none">
+                                <input type="text" id="degreeInput" class="input-field input-focus" placeholder="e.g. BSc Computer Science">
+                                <div style="display:flex;gap:0.75rem;margin-top:0.75rem">
+                                    <button onclick="saveDegree()" class="gradient-btn" style="padding:0.5rem 1.25rem;font-size:0.82rem">Save</button>
+                                    <button onclick="cancelEditDegree()" class="outline-btn" style="padding:0.5rem 1rem;font-size:0.82rem">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Skills -->
+                        <div>
+                            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+                                <p class="section-label" style="margin:0">Skills <span id="skillCountLabel" style="color:var(--violet)"></span></p>
+                                <button onclick="toggleAddSkill()" id="addSkillBtn"
+                                    style="font-size:0.75rem;font-weight:600;color:var(--violet);background:none;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;gap:0.3rem;transition:opacity 0.2s"
+                                    onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=1">
+                                    <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                                    </svg>
+                                    Add skill
+                                </button>
+                            </div>
+
+                            <!-- Add skill input -->
+                            <div id="addSkillInput" style="display:none;margin-bottom:0.875rem">
+                                <div style="display:flex;gap:0.6rem">
+                                    <input type="text" id="newSkillField"
+                                        class="input-field input-focus"
+                                        style="flex:1"
+                                        placeholder="e.g. Docker"
+                                        onkeydown="if(event.key==='Enter') saveNewSkill()">
+                                    <button onclick="saveNewSkill()" class="gradient-btn" style="padding:0.6rem 1rem;font-size:0.82rem;white-space:nowrap">Add</button>
+                                    <button onclick="toggleAddSkill()" class="outline-btn" style="padding:0.6rem 0.875rem;font-size:0.82rem">✕</button>
+                                </div>
+                                <p style="font-size:0.72rem;color:var(--muted);margin-top:0.4rem">Press Enter or click Add. Max 10 skills.</p>
+                            </div>
+
+                            <!-- Skills tags -->
+                            <div id="skillTagsDisplay" style="display:flex;flex-wrap:wrap;gap:0.5rem"></div>
+
+                            <!-- No skills -->
+                            <p id="noSkillsMsg" style="display:none;font-size:0.85rem;color:var(--muted);font-style:italic">
+                                No skills added yet — click "Add skill" to get started.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── CHANGE PASSWORD ── -->
+                <div class="card fade-in-3">
+                    <div class="card-title">Change Password</div>
+
+                    <div style="display:flex;flex-direction:column;gap:1rem">
+                        <div>
+                            <p class="section-label">Current Password</p>
+                            <input type="password" id="currentPassword" class="input-field" placeholder="••••••••">
+                        </div>
+                        <div>
+                            <p class="section-label">New Password</p>
+                            <input type="password" id="newPassword" class="input-field" placeholder="At least 8 characters">
+                        </div>
+                        <div>
+                            <p class="section-label">Confirm New Password</p>
+                            <input type="password" id="confirmPassword" class="input-field" placeholder="Re-enter new password">
+                            <p id="passwordMatchMsg" style="display:none;font-size:0.75rem;margin-top:0.4rem"></p>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--border)">
+                        <button onclick="changePassword()" class="gradient-btn" style="padding:0.65rem 1.5rem;font-size:0.875rem">
+                            Update Password
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ── DANGER ZONE ── -->
+                <div class="card fade-in-3">
+                    <div class="card-title">
+                        Sad to see you go!
+                    </div>
+                    <div class="danger-zone">
+                        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+                            <div>
+                                <p style="font-size:0.875rem;font-weight:700;color:#dc2626;margin-bottom:0.2rem">Delete Account</p>
+                                <p style="font-size:0.78rem;color:#ef4444;opacity:0.8">Permanently removes your account, CV, and all saved data.</p>
+                            </div>
+                            <button onclick="confirmDeleteAccount()"
+                                style="padding:0.55rem 1.25rem;border-radius:8px;font-size:0.82rem;font-weight:700;color:#dc2626;background:white;border:1.5px solid #fca5a5;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all 0.2s;white-space:nowrap"
+                                onmouseover="this.style.background='#dc2626';this.style.color='white'"
+                                onmouseout="this.style.background='white';this.style.color='#dc2626'">
+                                Delete Account
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <div style="display:flex;flex-direction:column;gap:1.5rem">
+
+                <!-- Profile Completeness -->
+                <div class="card fade-in-1">
+                    <div class="card-title" style="margin-bottom:1.25rem;padding-bottom:0.875rem">
+                        Profile Completeness
+                    </div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+                        <span style="font-size:0.82rem;color:var(--text-sm);font-weight:500">Overall</span>
+                        <span style="font-size:1rem;font-weight:800;color:var(--violet)" id="completenessLabel">0%</span>
+                    </div>
+                    <div class="progress-bar" style="margin-bottom:1.5rem">
+                        <div class="progress-fill" id="completenessBar" style="width:0%"></div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:0.75rem">
+                        <div style="display:flex;align-items:center;justify-content:space-between">
+                            <span style="font-size:0.8rem;color:var(--text-sm)">Personal details</span>
+                            <span id="checkPersonal" style="font-size:0.8rem;font-weight:700;color:var(--muted)">—</span>
+                        </div>
+                        <div style="display:flex;align-items:center;justify-content:space-between">
+                            <span style="font-size:0.8rem;color:var(--text-sm)">Degree on profile</span>
+                            <span id="checkDegree" style="font-size:0.8rem;font-weight:700;color:var(--muted)">—</span>
+                        </div>
+                        <div style="display:flex;align-items:center;justify-content:space-between">
+                            <span style="font-size:0.8rem;color:var(--text-sm)">3+ skills added</span>
+                            <span id="checkSkills" style="font-size:0.8rem;font-weight:700;color:var(--muted)">—</span>
+                        </div>
+                        <div style="display:flex;align-items:center;justify-content:space-between">
+                            <span style="font-size:0.8rem;color:var(--text-sm)">CV uploaded</span>
+                            <span id="checkCV" style="font-size:0.8rem;font-weight:700;color:var(--muted)">—</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Account Info -->
+                <div class="card fade-in-2">
+                    <div class="card-title" style="margin-bottom:1.25rem;padding-bottom:0.875rem">Account Info</div>
+                    <div style="display:flex;flex-direction:column;gap:0.875rem">
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:0.875rem;border-bottom:1px solid var(--border)">
+                            <span style="font-size:0.8rem;color:var(--text-sm)">Member since</span>
+                            <span style="font-size:0.82rem;font-weight:700;color:var(--text)" id="memberSince">—</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:0.875rem;border-bottom:1px solid var(--border)">
+                            <span style="font-size:0.8rem;color:var(--text-sm)">Saved jobs</span>
+                            <span style="font-size:0.82rem;font-weight:700;color:var(--violet)" id="savedCount">0</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;align-items:center">
+                            <span style="font-size:0.8rem;color:var(--text-sm)">Skills on profile</span>
+                            <span style="font-size:0.82rem;font-weight:700;color:var(--violet)" id="skillsCount">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="card fade-in-3">
+                    <div class="card-title" style="margin-bottom:1.25rem;padding-bottom:0.875rem">Quick Links</div>
+                    <div style="display:flex;flex-direction:column;gap:0.5rem">
+                        <a href="/results" style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;border-radius:10px;text-decoration:none;color:var(--text-sm);font-size:0.85rem;font-weight:500;transition:background 0.2s"
+                            onmouseover="this.style.background='var(--violet-pale)';this.style.color='var(--violet)'"
+                            onmouseout="this.style.background='transparent';this.style.color='var(--text-sm)'">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            Browse Matched Jobs
+                        </a>
+                        <a href="/saved-jobs" style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;border-radius:10px;text-decoration:none;color:var(--text-sm);font-size:0.85rem;font-weight:500;transition:background 0.2s"
+                            onmouseover="this.style.background='var(--violet-pale)';this.style.color='var(--violet)'"
+                            onmouseout="this.style.background='transparent';this.style.color='var(--text-sm)'">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-4-7 4V5z"/>
+                            </svg>
+                            Saved Jobs
+                        </a>
+
+                        <a href="/upload" style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;border-radius:10px;text-decoration:none;color:var(--text-sm);font-size:0.85rem;font-weight:500;transition:background 0.2s"
+                            onmouseover="this.style.background='var(--violet-pale)';this.style.color='var(--violet)'"
+                            onmouseout="this.style.background='transparent';this.style.color='var(--text-sm)'">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                            Upload New CV
+                        </a>
+                        <a href="/privacy" style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;border-radius:10px;text-decoration:none;color:var(--text-sm);font-size:0.85rem;font-weight:500;transition:background 0.2s"
+                            onmouseover="this.style.background='var(--violet-pale)';this.style.color='var(--violet)'"
+                            onmouseout="this.style.background='transparent';this.style.color='var(--text-sm)'">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                            Privacy Policy
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- TOAST -->
+    <div id="toast" class="toast"></div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+    <script>
+        const MAX_SKILLS = 10;
+        let profileSkills = [];
+        let editingPersonal = false;
+
+        // ── ON LOAD ────────────────────────────────────────────
+        window.onload = async function () {
+            if (!checkLogin()) return;
+            initNav();
+
+            if (!localStorage.getItem('userLoggedIn')) {
+                window.location.href = '/login';
+                return;
+            }
+
+            // Sync from backend session
+            try {
+                const res  = await fetch('/api/profile');
+                const data = await res.json();
+                if (data.success) {
+                    localStorage.setItem('userName',  data.profile.name);
+                    localStorage.setItem('userEmail', data.profile.email);
+                }
+            } catch (e) {
+                // If backend unreachable, fall back to localStorage silently
+            }
+
+            const name = localStorage.getItem('userName') || '';
+            const firstStored = localStorage.getItem('userFirstName') || '';
+            const lastStored  = localStorage.getItem('userLastName') || '';
+            const email   = localStorage.getItem('userEmail') || '';
+            const profile = JSON.parse(localStorage.getItem('userProfile') || 'null');
+            const saved   = JSON.parse(localStorage.getItem('savedJobs') || '[]');
+
+            // Personal fields
+            if (firstStored || lastStored) {
+                document.getElementById('fieldFirstName').value = firstStored;
+                document.getElementById('fieldLastName').value  = lastStored;
+            } else if (name.includes(' ')) {
+                const parts = name.split(' ');
+                document.getElementById('fieldFirstName').value = parts[0] || '';
+                document.getElementById('fieldLastName').value  = parts.slice(1).join(' ') || '';
+            } else if (name.includes('.')) {
+                const parts = name.split('.');
+                document.getElementById('fieldFirstName').value = parts[0] || '';
+                document.getElementById('fieldLastName').value  = parts.slice(1).join(' ') || '';
+            } else {
+                document.getElementById('fieldFirstName').value = name || '';
+                document.getElementById('fieldLastName').value  = '';
+            }
+
+            document.getElementById('fieldEmail').value = email;
+
+            // Account info
+            document.getElementById('savedCount').textContent = saved.length;
+            document.getElementById('memberSince').textContent = new Date().toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+
+            // CV Profile
+            if (profile) {
+                document.getElementById('noCVState').style.display  = 'none';
+                document.getElementById('hasCVState').style.display = 'block';
+                document.getElementById('degreeDisplay').textContent = profile.degree || 'Not specified';
+                document.getElementById('degreeInput').value         = profile.degree || '';
+                profileSkills = profile.skills || [];
+                renderSkillTags();
+            } else {
+                document.getElementById('noCVState').style.display  = 'block';
+                document.getElementById('hasCVState').style.display = 'none';
+            }
+
+            updateCompleteness();
+
+            // Password match live check
+            document.getElementById('confirmPassword').addEventListener('input', checkPasswordMatch);
+        };
+
+        // ── PERSONAL DETAILS ───────────────────────────────────
+        function toggleEditPersonal() {
+            editingPersonal = !editingPersonal;
+            const fields  = ['fieldFirstName','fieldLastName','fieldEmail'];
+            const actions = document.getElementById('personalActions');
+            const btn     = document.getElementById('editPersonalBtn');
+
+            fields.forEach(id => document.getElementById(id).disabled = !editingPersonal);
+            actions.style.display = editingPersonal ? 'flex' : 'none';
+            btn.textContent       = editingPersonal ? 'Cancel' : 'Edit';
+            if (editingPersonal) document.getElementById('fieldFirstName').focus();
+        }
+
+        function cancelEditPersonal() {
+            // Restore values
+            const name  = localStorage.getItem('userName') || '';
+            const email = localStorage.getItem('userEmail') || '';
+            const parts = name.split(' ');
+            document.getElementById('fieldFirstName').value = parts[0] || '';
+            document.getElementById('fieldLastName').value  = parts.slice(1).join(' ') || '';
+            document.getElementById('fieldEmail').value     = email;
+            editingPersonal = false;
+            toggleEditPersonal();
+        }
+
+        async function savePersonal() {
+            const first = document.getElementById('fieldFirstName').value.trim();
+            const last  = document.getElementById('fieldLastName').value.trim();
+            const email = document.getElementById('fieldEmail').value.trim();
+
+            if (!first || !email) {
+                showToast('First name and email are required.', 'error');
+                return;
+            }
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showToast('Please enter a valid email address.', 'error');
+                return;
+            }
+
+            const fullName = [first, last].filter(Boolean).join(' ');
+            try {
+            const response = await fetch('/api/profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: fullName,
+                    email: email
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                localStorage.setItem('userName', fullName);
+                localStorage.setItem('userFirstName', first);
+                localStorage.setItem('userLastName', last);
+                localStorage.setItem('userEmail', email);
+                document.getElementById('navGreeting').textContent = 'Welcome, ' + fullName + '!';
+
+                editingPersonal = false; // Set to false to close the edit mode
+                toggleEditPersonal();
+                updateCompleteness();
+                showToast('Personal details updated on server.', 'success');
+            } else {
+                showToast('Error: ' + result.error, 'error');
+            }
+        } catch (error) {
+            showToast('Server connection failed.', 'error');
+        }
+    }
+
+        // ── DEGREE ─────────────────────────────────────────────
+        function toggleEditDegree() {
+            const display = document.getElementById('degreeDisplay');
+            const edit    = document.getElementById('degreeEdit');
+            const btn     = document.getElementById('editDegreeBtn');
+            const isEditing = edit.style.display === 'block';
+
+            display.style.display = isEditing ? 'block' : 'none';
+            edit.style.display    = isEditing ? 'none'  : 'block';
+            btn.textContent       = isEditing ? 'Edit'  : 'Cancel';
+            if (!isEditing) document.getElementById('degreeInput').focus();
+        }
+
+        function cancelEditDegree() { toggleEditDegree(); }
+
+        function saveDegree() {
+            const val = document.getElementById('degreeInput').value.trim();
+            if (!val) { showToast('Please enter a degree.', 'error'); return; }
+
+            const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+            profile.degree = val;
+            localStorage.setItem('userProfile', JSON.stringify(profile));
+
+            document.getElementById('degreeDisplay').textContent = val;
+            toggleEditDegree();
+            updateCompleteness();
+            showToast('Degree updated.', 'success');
+        }
+
+        // ── SKILLS ─────────────────────────────────────────────
+        function toggleAddSkill() {
+            const inputDiv = document.getElementById('addSkillInput');
+            const showing  = inputDiv.style.display === 'block';
+            inputDiv.style.display = showing ? 'none' : 'block';
+            if (!showing) document.getElementById('newSkillField').focus();
+        }
+
+        function saveNewSkill() {
+            const input = document.getElementById('newSkillField');
+            const val   = input.value.trim();
+            if (!val) return;
+            if (profileSkills.includes(val)) {
+                showToast('This skill is already on your profile.', 'error'); return;
+            }
+            if (profileSkills.length >= MAX_SKILLS) {
+                showToast(`Maximum ${MAX_SKILLS} skills allowed.`, 'error'); return;
+            }
+            profileSkills.push(val);
+            input.value = '';
+            saveSkillsToStorage();
+            renderSkillTags();
+            updateCompleteness();
+            showToast(`"${val}" added to your profile.`, 'success');
+        }
+
+        function removeSkill(skill) {
+            profileSkills = profileSkills.filter(s => s !== skill);
+            saveSkillsToStorage();
+            renderSkillTags();
+            updateCompleteness();
+        }
+
+        function saveSkillsToStorage() {
+            const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+            profile.skills = profileSkills;
+            localStorage.setItem('userProfile', JSON.stringify(profile));
+            document.getElementById('skillsCount').textContent = profileSkills.length;
+        }
+
+        function renderSkillTags() {
+            const container  = document.getElementById('skillTagsDisplay');
+            const noSkillMsg = document.getElementById('noSkillsMsg');
+            const countLabel = document.getElementById('skillCountLabel');
+
+            container.innerHTML = '';
+            countLabel.textContent = `(${profileSkills.length}/${MAX_SKILLS})`;
+            document.getElementById('skillsCount').textContent = profileSkills.length;
+
+            if (profileSkills.length === 0) {
+                noSkillMsg.style.display = 'block';
+                return;
+            }
+            noSkillMsg.style.display = 'none';
+
+            profileSkills.forEach(skill => {
+                const tag = document.createElement('span');
+                tag.className = 'skill-tag';
+                tag.innerHTML = `${skill} <button type="button" onclick="removeSkill('${skill.replace(/'/g,"\\'")}')">✕</button>`;
+                container.appendChild(tag);
+            });
+        }
+
+        // ── PASSWORD ───────────────────────────────────────────
+        function checkPasswordMatch() {
+            const np  = document.getElementById('newPassword').value;
+            const cp  = document.getElementById('confirmPassword').value;
+            const msg = document.getElementById('passwordMatchMsg');
+            if (!cp) { msg.style.display = 'none'; return; }
+            if (np === cp) {
+                msg.style.display = 'block';
+                msg.style.color   = '#059669';
+                msg.textContent   = '✓ Passwords match';
+            } else {
+                msg.style.display = 'block';
+                msg.style.color   = '#dc2626';
+                msg.textContent   = 'Passwords do not match';
+            }
+        }
+
+        async function changePassword() {
+            const current = document.getElementById('currentPassword').value;
+            const np      = document.getElementById('newPassword').value;
+            const cp      = document.getElementById('confirmPassword').value;
+
+            if (!current) { showToast('Please enter your current password.', 'error'); return; }
+            if (np.length < 8) { showToast('New password must be at least 8 characters.', 'error'); return; }
+            if (np !== cp)     { showToast('Passwords do not match.', 'error'); return; }
+
+            try {
+                const res  = await fetch('/api/change-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ current_password: current, new_password: np })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('currentPassword').value = '';
+                    document.getElementById('newPassword').value     = '';
+                    document.getElementById('confirmPassword').value = '';
+                    document.getElementById('passwordMatchMsg').style.display = 'none';
+                    showToast('Password updated successfully.', 'success');
+                } else {
+                    showToast(data.error, 'error');
+                }
+            } catch {
+                showToast('Server connection failed.', 'error');
+            }
+        }
+
+        // ── COMPLETENESS ───────────────────────────────────────
+        function updateCompleteness() {
+            const name    = localStorage.getItem('userName') || '';
+            const profile = JSON.parse(localStorage.getItem('userProfile') || 'null');
+            const degree  = profile?.degree && profile.degree !== 'Not specified';
+            const skills  = (profile?.skills || []).length >= 3;
+            const hasCV   = !!profile;
+
+            const checks = [
+                { id: 'checkPersonal', pass: !!name },
+                { id: 'checkDegree',   pass: degree },
+                { id: 'checkSkills',   pass: skills },
+                { id: 'checkCV',       pass: hasCV  },
+            ];
+
+            let score = 0;
+            checks.forEach(c => {
+                const el = document.getElementById(c.id);
+                if (c.pass) {
+                    el.textContent = '✓';
+                    el.style.color = '#059669';
+                    score += 25;
+                } else {
+                    el.textContent = '—';
+                    el.style.color = 'var(--muted)';
+                }
+            });
+
+            document.getElementById('completenessLabel').textContent = score + '%';
+            setTimeout(() => {
+                document.getElementById('completenessBar').style.width = score + '%';
+            }, 200);
+        }
+
+        // ── DANGER ZONE ────────────────────────────────────────
+        async function confirmDeleteAccount() {
+            if (confirm('Are you sure you want to delete your account? This cannot be undone.')) {
+                await fetch('/api/delete-account', { method: 'POST' }); 
+                localStorage.clear();
+                window.location.href = '/login';
+            }
+        }
+
+        // ── TOAST ──────────────────────────────────────────────
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.className   = `toast ${type} show`;
+            setTimeout(() => { toast.className = `toast ${type}`; }, 3000);
+        }
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin — MarketMatch</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: var(--bg); min-height: 100vh; }
+    </style>
+</head>
+<body>
+
+    <nav class="mm-nav" id="mmNav">
+        <div class="mm-nav-inner">
+            <a href="/dashboard" class="mm-logo">
+                <div class="mm-logo-mark">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                    </svg>
+                </div>
+                MarketMatch
+            </a>
+            <div class="mm-nav-links">
+                <a href="/dashboard"  class="mm-nav-link">Dashboard</a>
+                <a href="/upload"     class="mm-nav-link">Upload CV</a>
+                <a href="/results"    class="mm-nav-link">Jobs</a>
+                <a href="/saved-jobs" class="mm-nav-link">Saved Jobs</a>
+                <a href="/admin"      id="adminNavLink" class="mm-nav-link active" style="display:none;color:var(--purple);font-weight:700">Admin</a>
+            </div>
+            <div class="mm-nav-right">
+                <a href="/profile" id="navGreeting" class="mm-nav-greeting">Welcome!</a>
+                <button onclick="logout()" class="mm-logout-btn">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <main style="max-width:700px;margin:3rem auto;padding:0 1.5rem">
+
+        <!-- Access denied state -->
+        <div id="accessDenied" class="hidden mm-card-static" style="text-align:center;padding:4rem 2rem">
+            <svg width="48" height="48" fill="none" stroke="var(--error)" viewBox="0 0 24 24" style="margin:0 auto 1rem">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01M5.07 19H19a2 2 0 001.75-2.96L13.75 4a2 2 0 00-3.5 0L3.25 16.04A2 2 0 005.07 19z"/>
+            </svg>
+            <h2 style="font-size:1.2rem;font-weight:700;color:var(--text);margin-bottom:0.5rem">Access Denied</h2>
+            <p style="color:var(--muted);font-size:0.9rem">You do not have permission to view this page.</p>
+            <a href="/dashboard" class="btn-primary" style="display:inline-flex;margin-top:1.5rem;padding:0.65rem 1.5rem;font-size:0.875rem">
+                Back to Dashboard
+            </a>
+        </div>
+
+        <!-- Admin panel -->
+        <div id="adminPanel" class="hidden">
+            <div style="margin-bottom:2rem">
+                <p style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:0.35rem">Admin Panel</p>
+                <h1 style="font-size:1.8rem;font-weight:800;letter-spacing:-0.5px;color:var(--text)">Dataset Management</h1>
+            </div>
+
+            <!-- Current version info -->
+            <div class="mm-card-static fade-in" style="margin-bottom:1.5rem">
+                <div class="mm-card-title">Current Dataset</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+                    <div style="background:var(--bg);border-radius:10px;padding:1rem">
+                        <p class="mm-label-muted">Version</p>
+                        <p style="font-size:1rem;font-weight:700;color:var(--violet)" id="currentVersion">Loading...</p>
+                    </div>
+                    <div style="background:var(--bg);border-radius:10px;padding:1rem">
+                        <p class="mm-label-muted">Records</p>
+                        <p style="font-size:1rem;font-weight:700;color:var(--text)" id="currentRecords">Loading...</p>
+                    </div>
+                    <div style="background:var(--bg);border-radius:10px;padding:1rem">
+                        <p class="mm-label-muted">Last Updated</p>
+                        <p style="font-size:1rem;font-weight:700;color:var(--text)" id="lastUpdated">Loading...</p>
+                    </div>
+                    <div style="background:var(--bg);border-radius:10px;padding:1rem">
+                        <p class="mm-label-muted">Dataset Name</p>
+                        <p style="font-size:1rem;font-weight:700;color:var(--text)" id="datasetName">Loading...</p>
+                    </div>
+                </div>
+
+                <div style="margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--border)">
+                    <p class="mm-label-muted">Change History</p>
+                    <ul id="changeHistory" style="margin-top:0.5rem;display:flex;flex-direction:column;gap:0.4rem"></ul>
+                </div>
+            </div>
+
+            <!-- Upload new dataset -->
+            <div class="mm-card-static fade-in-1">
+                <div class="mm-card-title">Upload New Dataset</div>
+
+                <!-- Error banner -->
+                <div id="errorBanner" class="mm-banner error" style="display:none">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span id="errorMsg">Something went wrong.</span>
+                </div>
+
+                <!-- Success banner -->
+                <div id="successBanner" class="mm-banner success" style="display:none">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span id="successMsg">Dataset updated successfully.</span>
+                </div>
+
+                <!-- Drop zone -->
+                <div id="dropZone"
+                    onclick="document.getElementById('fileInput').click()"
+                    style="border:2px dashed var(--border);border-radius:12px;padding:2.5rem;text-align:center;cursor:pointer;transition:border-color 0.2s,background 0.2s;margin-bottom:1.25rem"
+                    onmouseover="this.style.borderColor='var(--violet)';this.style.background='var(--violet-pale)'"
+                    onmouseout="this.style.borderColor='var(--border)';this.style.background='transparent'">
+                    <svg width="40" height="40" fill="none" stroke="var(--muted)" viewBox="0 0 24 24" style="margin:0 auto 1rem">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                    </svg>
+                    <p style="font-size:0.9rem;font-weight:600;color:var(--text-sm)">Click to select a CSV file</p>
+                    <p style="font-size:0.78rem;color:var(--muted);margin-top:0.35rem">Only .csv files accepted</p>
+                    <input type="file" id="fileInput" accept=".csv" style="display:none" onchange="handleFile(this.files[0])">
+                </div>
+
+                <!-- File info -->
+                <div id="fileInfo" style="display:none;background:var(--violet-pale);border:1px solid rgba(102,126,234,0.2);border-radius:10px;padding:0.875rem 1rem;margin-bottom:1.25rem;align-items:center;justify-content:space-between">
+                    <div style="display:flex;align-items:center;gap:0.75rem">
+                        <svg width="24" height="24" fill="none" stroke="var(--violet)" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <div>
+                            <p style="font-size:0.875rem;font-weight:600;color:var(--text)" id="fileName">file.csv</p>
+                            <p style="font-size:0.75rem;color:var(--muted)" id="fileSize">0 KB</p>
+                        </div>
+                    </div>
+                    <button onclick="removeFile()" style="background:none;border:none;cursor:pointer;color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='var(--muted)'">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <button onclick="uploadDataset()" id="uploadBtn"
+                    class="btn-primary" style="width:100%;justify-content:center;padding:0.85rem;font-size:0.95rem">
+                    Upload & Update Dataset
+                </button>
+
+                <p style="font-size:0.78rem;color:var(--muted);margin-top:1rem;text-align:center">
+                    Uploading a new dataset will immediately replace the current one and reload the recommendation system.
+                </p>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="mmToast" class="mm-toast"></div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+        let selectedFile = null;
+
+        window.onload = async function () {
+            if (!checkLogin()) return;
+            initNav();
+
+            const isAdmin = localStorage.getItem('isAdmin') === 'true';
+
+            if (!isAdmin) {
+                document.getElementById('accessDenied').classList.remove('hidden');
+                return;
+            }
+
+            document.getElementById('adminPanel').classList.remove('hidden');
+            loadVersionInfo();
+        };
+
+        async function loadVersionInfo() {
+            try {
+                const res  = await fetch('/api/dataset-version');
+                const data = await res.json();
+                if (!data.success) return;
+
+                const v = data.version;
+                document.getElementById('currentVersion').textContent = `v${v.version}`;
+                document.getElementById('currentRecords').textContent = `${v.records.toLocaleString()} records`;
+                document.getElementById('lastUpdated').textContent    = v.last_updated;
+                document.getElementById('datasetName').textContent    = v.name;
+
+                const history = document.getElementById('changeHistory');
+                history.innerHTML = v.changes.map(c => `
+                    <li style="font-size:0.8rem;color:var(--text-sm);display:flex;align-items:flex-start;gap:0.5rem">
+                        <span style="color:var(--violet);flex-shrink:0">•</span>${c}
+                    </li>
+                `).join('');
+            } catch (e) {
+                console.error('Could not load version info', e);
+            }
+        }
+
+        function handleFile(file) {
+            if (!file || !file.name.endsWith('.csv')) {
+                showError('Please select a valid CSV file.');
+                return;
+            }
+            selectedFile = file;
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatFileSize(file.size);
+            document.getElementById('fileInfo').style.display = 'flex';
+            document.getElementById('dropZone').style.display = 'none';
+            hideMessages();
+        }
+
+        function removeFile() {
+            selectedFile = null;
+            document.getElementById('fileInput').value = '';
+            document.getElementById('fileInfo').style.display = 'none';
+            document.getElementById('dropZone').style.display = 'block';
+        }
+
+        async function uploadDataset() {
+            if (!selectedFile) {
+                showError('Please select a CSV file first.');
+                return;
+            }
+
+            const btn = document.getElementById('uploadBtn');
+            btn.textContent = 'Uploading...';
+            btn.disabled    = true;
+            hideMessages();
+
+            const formData = new FormData();
+            formData.append('dataset', selectedFile);
+
+            try {
+                const res = await fetch('/api/admin/upload-dataset', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    document.getElementById('successMsg').textContent =
+                        `Dataset updated to v${data.version} with ${data.records.toLocaleString()} records.`;
+                    document.getElementById('successBanner').style.display = 'flex';
+                    removeFile();
+                    loadVersionInfo();
+                    showToast('Dataset updated successfully.', 'success');
+                } else {
+                    showError(data.error || 'Upload failed. Please try again.');
+                }
+            } catch (e) {
+                showError('Could not connect to server. Please try again.');
+            } finally {
+                btn.textContent = 'Upload & Update Dataset';
+                btn.disabled    = false;
+            }
+        }
+
+        function showError(msg) {
+            document.getElementById('errorMsg').textContent  = msg;
+            document.getElementById('errorBanner').style.display = 'flex';
+        }
+
+        function hideMessages() {
+            document.getElementById('errorBanner').style.display  = 'none';
+            document.getElementById('successBanner').style.display = 'none';
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/login';
+        }
+    </script>
+</body>
+</html>

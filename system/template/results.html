@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Matches — MarketMatch</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .results-shell {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem 4rem;
+        }
+
+        .results-hero {
+            background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.08));
+            border: 1px solid rgba(102,126,234,0.14);
+            border-radius: 24px;
+            padding: 1.75rem;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+            margin-bottom: 1.5rem;
+        }
+
+        .results-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.4px;
+            color: var(--muted);
+            margin-bottom: 0.4rem;
+        }
+
+        .results-title {
+            font-size: clamp(1.45rem, 3vw, 2rem);
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: -0.5px;
+            margin-bottom: 0.45rem;
+        }
+
+        .results-subtitle {
+            font-size: 0.92rem;
+            color: var(--text-sm);
+        }
+
+        .profile-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.38rem 0.85rem;
+            background: rgba(255,255,255,0.9);
+            border: 1px solid rgba(102,126,234,0.14);
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-sm);
+        }
+
+        .toolbar-card,
+        .filter-card,
+        .prediction-card,
+        .forecast-card,
+        .info-card,
+        .empty-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .toolbar-card {
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            overflow: visible;
+            position: relative;
+            z-index: 20;
+        }
+
+        .filter-card {
+            padding: 1.35rem;
+            position: sticky;
+            top: 6.5rem;
+        }
+
+        .filter-title,
+
+        .filter-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .filter-group label.block-label {
+            display: block;
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: var(--text-sm);
+            margin-bottom: 0.55rem;
+        }
+
+        .filter-check {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.45rem 0.2rem;
+            font-size: 0.86rem;
+            color: var(--text-sm);
+            cursor: pointer;
+        }
+
+        .filter-check input {
+            accent-color: var(--violet);
+        }
+
+        .results-count {
+            margin-bottom: 1rem;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .results-count span {
+            color: var(--violet);
+        }
+
+        .job-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            font-size: 0.84rem;
+            color: var(--text-sm);
+        }
+
+        .job-meta-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .job-chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.9rem;
+        }
+
+        .job-chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.35rem 0.8rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: var(--bg);
+            color: var(--text-sm);
+            border: 1px solid var(--border);
+        }
+
+        .job-chip.primary {
+            background: var(--violet-pale);
+            color: var(--violet);
+            border-color: rgba(102,126,234,0.22);
+        }
+
+        .job-chip.soft {
+            background: rgba(118,75,162,0.08);
+            color: var(--purple);
+            border-color: rgba(118,75,162,0.14);
+        }
+
+        .skills-label {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.55rem;
+        }
+
+        .skill-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+        }
+
+        .demand-skill {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.35rem 0.8rem;
+            background: var(--violet-pale);
+            color: var(--violet);
+            border: 1px solid rgba(102,126,234,0.2);
+            border-radius: 999px;
+            font-size: 0.76rem;
+            font-weight: 600;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .demand-skill:hover {
+            transform: translateY(-1px);
+            background: rgba(102,126,234,0.15);
+        }
+
+        .missing-skill {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.35rem 0.8rem;
+            background: #f3f4f6;
+            color: #6b7280;
+            border: 1px solid #e5e7eb;
+            border-radius: 999px;
+            font-size: 0.76rem;
+            font-weight: 600;
+        }
+
+        .match-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.45rem;
+            margin-left: 1rem;
+            flex-shrink: 0;
+        }
+
+        .match-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--muted);
+        }
+
+        .prediction-card {
+            padding: 1.35rem;
+        }
+
+        .prediction-card h3,
+        .forecast-card h4,
+        .info-card h4 {
+            color: var(--text);
+        }
+
+        .forecast-card,
+        .info-card {
+            padding: 1.35rem;
+        }
+
+        .prediction-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1rem;
+            margin: 1.25rem 0 1.5rem;
+        }
+
+        .stat-block {
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 1.2rem;
+            background: linear-gradient(180deg, #ffffff 0%, #fafbff 100%);
+        }
+
+        .stat-block .stat-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--muted);
+            margin-bottom: 0.45rem;
+        }
+
+        .stat-block .stat-value {
+            font-size: 1.95rem;
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: -0.5px;
+        }
+
+        .stat-block .stat-note {
+            font-size: 0.76rem;
+            color: var(--muted);
+            margin-top: 0.45rem;
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.85rem;
+        }
+
+        .skills-demand-card {
+            background: #fff;
+            border: 1px solid rgba(102,126,234,0.16);
+            border-radius: 16px;
+            padding: 1rem;
+            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .skills-demand-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(102,126,234,0.28);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .skills-demand-card .demand-title {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.3rem;
+        }
+
+        .skills-demand-card .demand-meta {
+            font-size: 0.8rem;
+            color: var(--violet);
+            font-weight: 600;
+        }
+
+        .forecast-chart-wrap {
+            background: linear-gradient(180deg, #ffffff 0%, #fcfcff 100%);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 1rem;
+        }
+
+        .sector-row,
+        .career-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.95rem 1rem;
+            border-radius: 14px;
+            background: #fafbff;
+            border: 1px solid var(--border);
+        }
+
+        .career-row {
+            border-left: 4px solid var(--violet);
+        }
+
+        .trend-up {
+            color: var(--violet);
+            font-weight: 700;
+        }
+
+        .results-fade {
+            animation: fadeInUp 0.42s ease both;
+        }
+
+        .results-fade-1 { animation: fadeInUp 0.42s 0.05s ease both; }
+        .results-fade-2 { animation: fadeInUp 0.42s 0.1s ease both; }
+        .results-fade-3 { animation: fadeInUp 0.42s 0.15s ease both; }
+
+        select.mm-input {
+            appearance: none;
+            -webkit-appearance: none;
+
+            background-color: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+
+            padding: 0.55rem 2.5rem 0.55rem 0.9rem;
+            font-size: 0.9rem;
+            color: var(--text);
+
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b92ae' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.9rem center;
+
+            transition: border 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+        }
+
+        select.mm-input:focus {
+            border-color: var(--violet);
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.12);
+            outline: none;
+        }
+
+        select.mm-input option {
+            color: var(--text);
+            background: white;
+            padding: 0.5rem;
+        }
+
+        select.mm-input option:checked {
+            background: var(--violet);
+            color: #ffffff;
+        }
+
+        select.mm-input option:hover {
+            background: var(--violet-pale);
+        }
+
+        select.mm-input:hover {
+            border-color: var(--violet);
+        }
+        /* ===== Custom Dropdown ===== */
+        .custom-select {
+            position: relative;
+        }
+
+        .custom-select-trigger {
+            width: 100%;
+            min-height: 46px;
+            padding: 0.65rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: #fff;
+            color: var(--text);
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .custom-select-trigger:hover {
+            border-color: var(--violet);
+        }
+
+        .custom-select.open .custom-select-trigger {
+            border-color: var(--violet);
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.12);
+        }
+
+        .custom-select-arrow {
+            font-size: 0.75rem;
+            color: var(--muted);
+            transition: transform 0.2s ease;
+        }
+
+        .custom-select.open .custom-select-arrow {
+            transform: rotate(180deg);
+        }
+
+        .custom-select-menu {
+            position: absolute;
+            top: calc(100% + 0.4rem);
+            left: 0;
+            width: 100%;
+            background: #fff;
+            border: 1px solid rgba(102,126,234,0.14);
+            border-radius: 14px;
+            padding: 0.35rem;
+            box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+            z-index: 9999;
+        }
+
+        .custom-select-option {
+            width: 100%;
+            text-align: left;
+            padding: 0.7rem 0.9rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .custom-select-option:hover {
+            background: var(--violet-pale);
+            color: var(--violet);
+        }
+
+        .custom-select-option.active {
+            background: rgba(102,126,234,0.10);
+            color: var(--violet);
+            font-weight: 600;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 900px) {
+            .prediction-grid,
+            .skills-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .match-wrap {
+                align-items: flex-start;
+                margin-left: 0;
+                margin-top: 1rem;
+            }
+        }
+    </style>
+</head>
+<body style="background: var(--bg);">
+
+    <nav class="mm-nav" id="mmNav">
+        <div class="mm-nav-inner">
+            <a href="/dashboard" class="mm-logo">
+                <div class="mm-logo-mark">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                    </svg>
+                </div>
+                MarketMatch
+            </a>
+
+            <div class="mm-nav-links">
+                <a href="/dashboard" class="mm-nav-link">Dashboard</a>
+                <a href="/upload" class="mm-nav-link">Upload CV</a>
+                <a href="/results" class="mm-nav-link active">Jobs</a>
+                <a href="/saved-jobs" class="mm-nav-link">Saved Jobs</a>
+                <a href="/admin" id="adminNavLink" class="mm-nav-link" style="display:none;color:var(--purple);font-weight:700">Admin</a>
+            </div>
+
+            <div class="mm-nav-right">
+                <a href="/profile" id="navGreeting" class="mm-nav-greeting">Welcome, [Name]!</a>
+                <button onclick="logout()" class="mm-logout-btn">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="results-shell">
+        <section class="results-hero results-fade">
+            <p class="results-label">Recommendations</p>
+            <h1 class="results-title">Your Best Job Matches</h1>
+            <p class="results-subtitle">Explore recommended roles based on your uploaded profile, skills, and preferences.</p>
+
+            <div class="mt-5 flex flex-wrap gap-3 items-start">
+                <div class="profile-pill">
+                    <span style="font-weight:700;">Degree:</span>
+                    <span id="profileDegree">BSc Computer Science</span>
+                </div>
+                <div class="flex items-start gap-2 flex-wrap">
+                    <span class="profile-pill" style="font-weight:700;">Skills</span>
+                    <div id="profileSkills" class="flex flex-wrap gap-2"></div>
+                </div>
+            </div>
+        </section>
+
+        <div class="toolbar-card results-fade-1">
+            <div class="flex flex-col md:flex-row gap-4">
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Search jobs by title or company..."
+                    class="mm-input"
+                    onkeyup="filterJobs()">
+
+                <div class="custom-select w-full md:max-w-[220px]" id="sortDropdown">
+                    <button type="button" class="custom-select-trigger" onclick="toggleCustomDropdown('sortDropdown')">
+                        <span id="sortSelectedText">Best Match</span>
+                        <span class="custom-select-arrow">▾</span>
+                    </button>
+
+                    <div class="custom-select-menu hidden">
+                        <button type="button" class="custom-select-option active"
+                            onclick="selectCustomOption('sortDropdown','match','Best Match', sortJobs)">
+                            Best Match
+                        </button>
+
+                        <button type="button" class="custom-select-option"
+                            onclick="selectCustomOption('sortDropdown','salary_high','Highest Salary', sortJobs)">
+                            Highest Salary
+                        </button>
+
+                        <button type="button" class="custom-select-option"
+                            onclick="selectCustomOption('sortDropdown','salary_low','Lowest Salary', sortJobs)">
+                            Lowest Salary
+                        </button>
+                    </div>
+
+                    <input type="hidden" id="sortSelect" value="match">
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <aside class="lg:col-span-1 results-fade-2">
+                <div class="filter-card">
+                    <h2 class="filter-title">Filters</h2>
+
+                    <div class="filter-group">
+                        <label class="block-label" for="locationFilter">Location</label>
+                        <select id="locationFilter" onchange="filterJobs()" class="mm-input">
+                            <option value="">All Locations</option>
+                            <option value="London">London</option>
+                            <option value="Birmingham">Birmingham</option>
+                            <option value="Manchester">Manchester</option>
+                            <option value="Edinburgh">Edinburgh</option>
+                            <option value="Bristol">Bristol</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="block-label" for="salaryFilter">Minimum Salary: £<span id="salaryValue">20,000</span></label>
+                        <input
+                            type="range"
+                            id="salaryFilter"
+                            min="20000"
+                            max="100000"
+                            step="5000"
+                            value="20000"
+                            class="w-full"
+                            style="accent-color: var(--violet);"
+                            oninput="updateSalaryLabel(); filterJobs();"
+                        >
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="block-label">Employment Type</label>
+                        <div class="space-y-1">
+                            <label class="filter-check">
+                                <input type="checkbox" value="Full-time" onchange="filterJobs()" class="filter-employment">
+                                Full-time
+                            </label>
+                            <label class="filter-check">
+                                <input type="checkbox" value="Part-time" onchange="filterJobs()" class="filter-employment">
+                                Part-time
+                            </label>
+                            <label class="filter-check">
+                                <input type="checkbox" value="Contract" onchange="filterJobs()" class="filter-employment">
+                                Contract
+                            </label>
+                            <label class="filter-check">
+                                <input type="checkbox" value="Temporary" onchange="filterJobs()" class="filter-employment">
+                                Temporary
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="filter-group" style="margin-bottom: 1.5rem;">
+                        <label class="block-label">Experience Level</label>
+                        <div class="space-y-1">
+                            <label class="filter-check">
+                                <input type="checkbox" value="Graduate" onchange="filterJobs()" class="filter-experience">
+                                Graduate
+                            </label>
+                            <label class="filter-check">
+                                <input type="checkbox" value="Intern" onchange="filterJobs()" class="filter-experience">
+                                Intern
+                            </label>
+                            <label class="filter-check">
+                                <input type="checkbox" value="Senior" onchange="filterJobs()" class="filter-experience">
+                                Senior
+                            </label>
+                            <label class="filter-check">
+                                <input type="checkbox" value="Manager" onchange="filterJobs()" class="filter-experience">
+                                Manager
+                            </label>
+                        </div>
+                    </div>
+
+                    <button onclick="resetFilters()" class="btn-outline w-full justify-center">
+                        Reset Filters
+                    </button>
+                </div>
+            </aside>
+
+            <section class="lg:col-span-3">
+                <div class="results-count results-fade-2">
+                    <span id="jobCount">10</span> Recommended Jobs
+                </div>
+
+                <div id="jobsContainer" class="space-y-4 results-fade-3"></div>
+
+                <div id="loadingJobs" class="empty-card text-center py-12 px-6">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto" style="border-color: var(--violet);"></div>
+                    <p class="text-gray-600 mt-4 font-medium">Loading recommendations...</p>
+                </div>
+
+                <div id="noResults" class="hidden empty-card text-center py-12 px-6">
+                    <svg class="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">No jobs match your filters</h3>
+                    <p class="text-gray-600">Try adjusting your search criteria.</p>
+                </div>
+            </section>
+        </div>
+
+        <section class="mt-12 results-fade-3">
+            <div class="mb-6">
+                <p class="results-label">Predictions</p>
+                <h2 class="results-title" style="font-size:clamp(1.3rem,2.8vw,1.8rem); margin-bottom:0.3rem;">Market Predictions & Career Insights</h2>
+                <p class="results-subtitle">Data-driven analysis of future job market trends for your degree.</p>
+            </div>
+
+            <div class="prediction-card mb-6">
+                <h3 class="text-xl font-semibold mb-2">Market Outlook for <span id="predictionDegree">Computer Science</span> Graduates</h3>
+                <p class="text-sm text-gray-600">A quick view of current opportunities, salary direction, and where demand is heading next.</p>
+
+                <div class="prediction-grid">
+                    <div class="stat-block">
+                        <div class="stat-label">Jobs Available Now</div>
+                        <div class="stat-value" id="currentJobCount">
+                            <div class="animate-pulse text-gray-400 text-base font-medium">Loading...</div>
+                        </div>
+                        <div class="stat-note">Active positions in the UK</div>
+                    </div>
+
+                    <div class="stat-block">
+                        <div class="stat-label">Average Salary</div>
+                        <div class="stat-value" id="avgSalary">
+                            <div class="animate-pulse text-gray-400 text-base font-medium">Loading...</div>
+                        </div>
+                        <div class="stat-note">Typical starting range</div>
+                    </div>
+
+                    <div class="stat-block">
+                        <div class="stat-label">Future Trend (6 months)</div>
+                        <div class="stat-value" id="marketTrend">
+                            <div class="animate-pulse text-gray-400 text-base font-medium">Loading...</div>
+                        </div>
+                        <div class="stat-note">Predicted growth rate</div>
+                    </div>
+                </div>
+
+                <div class="forecast-chart-wrap mb-6">
+                    <h4 class="font-semibold mb-4">Job Market Forecast</h4>
+                    <canvas id="trendChart" height="80"></canvas>
+                </div>
+
+                <div class="forecast-card" style="background: linear-gradient(135deg, rgba(102,126,234,0.06), rgba(118,75,162,0.06)); border-color: rgba(102,126,234,0.16);">
+                    <h4 class="font-semibold mb-4">Most In-Demand Skills for Your Degree</h4>
+                    <div id="topSkillsList" class="skills-grid">
+                        <div class="animate-pulse bg-gray-200 h-20 rounded-2xl"></div>
+                        <div class="animate-pulse bg-gray-200 h-20 rounded-2xl"></div>
+                        <div class="animate-pulse bg-gray-200 h-20 rounded-2xl"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="info-card">
+                    <h4 class="font-semibold text-lg mb-4">Hot Sectors Right Now</h4>
+                    <div id="hotSectors" class="space-y-3"></div>
+                </div>
+
+                <div class="info-card">
+                    <h4 class="font-semibold text-lg mb-4">Typical Career Progression</h4>
+                    <div class="space-y-3">
+                        <div class="career-row">
+                            <div>
+                                <div class="font-medium text-sm text-gray-900">Year 0–2: Graduate / Junior</div>
+                                <div class="text-xs text-gray-600 mt-1" id="salary0-2">£25k - £35k</div>
+                            </div>
+                            <div class="trend-up text-sm">Entry</div>
+                        </div>
+                        <div class="career-row">
+                            <div>
+                                <div class="font-medium text-sm text-gray-900">Year 3–5: Mid-Level</div>
+                                <div class="text-xs text-gray-600 mt-1" id="salary3-5">£40k - £60k</div>
+                            </div>
+                            <div class="trend-up text-sm">Growth</div>
+                        </div>
+                        <div class="career-row">
+                            <div>
+                                <div class="font-medium text-sm text-gray-900">Year 5+: Senior / Manager</div>
+                                <div class="text-xs text-gray-600 mt-1" id="salary5plus">£65k - £100k+</div>
+                            </div>
+                            <div class="trend-up text-sm">Expert</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-8 text-sm text-gray-500">
+                <p>Data sourced from MarketMatch Dataset <span id="datasetVersion"></span> | Last refreshed: <span id="lastUpdated">Just now</span></p>
+            </div>
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    
+    <script>
+        let allJobs = [];
+        let filteredJobs = [];
+        let trendChartInstance = null;
+
+        // function parseSalaryValue(value) {
+        //     if (value === null || value === undefined || value === '') return 0;
+        //     if (typeof value === 'number') return value;
+        //     return Number(String(value).replace(/[^\d.-]/g, '')) || 0;
+        // }
+
+        function getJobSalary(job) {
+            return (
+                parseSalaryValue(job.annual_salary) ||
+                parseSalaryValue(job.avg_salary) ||
+                parseSalaryValue(job.min_salary) ||
+                parseSalaryValue(job.max_salary) ||
+                0
+            );
+        }
+
+        function parseSalaryValue(value) {
+    if (value === null || value === undefined || value === '') return 0;
+    if (typeof value === 'number') return value;
+    return Number(String(value).replace(/[^\d.-]/g, '')) || 0;
+}
+
+        function getNumericSalary(job) {
+            const avg = parseSalaryValue(job.avg_salary);
+            const min = parseSalaryValue(job.min_salary);
+            const max = parseSalaryValue(job.max_salary);
+
+            if (avg) return avg;
+            if (min && max) return Math.round((min + max) / 2);
+            if (max) return max;
+            if (min) return min;
+
+            if (job.salary) {
+                const matches = String(job.salary).match(/[\d,]+/g);
+                if (matches && matches.length >= 2) {
+                    const minFromText = Number(matches[0].replace(/,/g, '')) || 0;
+                    const maxFromText = Number(matches[1].replace(/,/g, '')) || 0;
+                    if (minFromText && maxFromText) {
+                        return Math.round((minFromText + maxFromText) / 2);
+                    }
+                }
+                if (matches && matches.length === 1) {
+                    return Number(matches[0].replace(/,/g, '')) || 0;
+                }
+            }
+
+            return 0;
+        }
+
+        function getDisplaySalary(job) {
+            if (job.salary) return job.salary;
+
+            const min = Number(job.min_salary || 0);
+            const max = Number(job.max_salary || 0);
+
+            if (min && max) return formatSalaryRange(min, max);
+            if (max) return formatSalary(max);
+            if (min) return formatSalary(min);
+
+            return 'Salary not listed';
+        }
+
+        window.onload = function() {
+            if (!checkLogin()) return;
+            initNav();
+
+            const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+
+            if (userProfile.degree) {
+                document.getElementById('profileDegree').textContent = userProfile.degree;
+                document.getElementById('predictionDegree').textContent = userProfile.degree;
+            }
+
+            const skillsContainer = document.getElementById('profileSkills');
+            skillsContainer.innerHTML = '';
+
+            if (userProfile.skills && userProfile.skills.length) {
+                userProfile.skills.slice(0, 5).forEach(skill => {
+                    const tag = document.createElement('span');
+                    tag.className = 'profile-pill';
+                    tag.textContent = skill;
+                    skillsContainer.appendChild(tag);
+                });
+            } else {
+                const fallback = document.createElement('span');
+                fallback.className = 'profile-pill';
+                fallback.textContent = 'No skills added yet';
+                skillsContainer.appendChild(fallback);
+            }
+
+            updateSalaryLabel();
+            loadJobs();
+            const degreeForPrediction = (userProfile.degree && userProfile.degree !== 'Extracted from CV')
+                ? userProfile.degree
+                : '';
+            loadPredictions(degreeForPrediction);
+        };
+
+        function loadJobs() {
+            const stored = localStorage.getItem('jobResults');
+
+            if (!stored) {
+                document.getElementById('loadingJobs').classList.add('hidden');
+                document.getElementById('noResults').classList.remove('hidden');
+                document.getElementById('jobCount').textContent = '0';
+                return;
+            }
+
+            allJobs = JSON.parse(stored);
+
+            allJobs = allJobs.map(job => {
+                const parseSalary = (value) => {
+                    if (value === null || value === undefined || value === '') return 0;
+                    if (typeof value === 'number') return value;
+                    return Number(String(value).replace(/[^\d.-]/g, '')) || 0;
+                };
+
+                const minSalary = parseSalary(job.min_salary);
+                const maxSalary = parseSalary(job.max_salary);
+                const avgSalary = parseSalary(job.avg_salary);
+
+                const numericSalary =
+                    avgSalary ||
+                    (minSalary && maxSalary ? Math.round((minSalary + maxSalary) / 2) : 0) ||
+                    maxSalary ||
+                    minSalary;
+                    
+                return {
+                    ...job,
+                    job_id: job.job_id || 0,
+                    job_title: job.job_title || '',
+                    company_name: job.company_name || '',
+                    location: job.location || '',
+                    employment_type: (job.employment_type || '').trim(),
+                    experience_level: (job.experience_level || '').trim(),
+                    industry: job.industry || 'Not specified',
+                    min_salary: minSalary,
+                    max_salary: maxSalary,
+                    avg_salary: avgSalary,
+                    final_score: Number(job.final_score || 0),
+                    matched_skills: Array.isArray(job.matched_skills) ? job.matched_skills : [],
+                    missing_skills: Array.isArray(job.missing_skills) ? job.missing_skills : [],
+                    annual_salary: (() => {
+                        if (job.salary) {
+                            const matches = job.salary.match(/[\d,]+/g);
+                            if (matches && matches.length >= 2) {
+                                const min = Number(matches[0].replace(/,/g, ''));
+                                const max = Number(matches[1].replace(/,/g, ''));
+                                return Math.round((min + max) / 2);
+                            }
+                        }
+                        return 0;
+                    })(),
+                };
+            });
+
+            populateLocationFilter();
+            filteredJobs = [...allJobs];
+            displayJobs();
+
+        }
+        function populateLocationFilter() {
+            const locationFilter = document.getElementById('locationFilter');
+
+            const uniqueLocations = [...new Set(
+                allJobs
+                    .map(job => (job.location || '').trim())
+                    .filter(location => location !== '')
+            )].sort((a, b) => a.localeCompare(b));
+
+            locationFilter.innerHTML = '<option value="">All Locations</option>';
+
+            uniqueLocations.forEach(location => {
+                const option = document.createElement('option');
+                option.value = location;
+                option.textContent = location;
+                locationFilter.appendChild(option);
+            });
+        }
+
+        function displayJobs() {
+            const container = document.getElementById('jobsContainer');
+            const loading = document.getElementById('loadingJobs');
+            const noResults = document.getElementById('noResults');
+
+            loading.classList.add('hidden');
+
+            if (filteredJobs.length === 0) {
+                container.classList.add('hidden');
+                noResults.classList.remove('hidden');
+                document.getElementById('jobCount').textContent = '0';
+                return;
+            }
+
+            container.classList.remove('hidden');
+            noResults.classList.add('hidden');
+            document.getElementById('jobCount').textContent = filteredJobs.length;
+
+            container.innerHTML = filteredJobs.map(job => {
+                const matchPercent = Math.round(job.final_score * 100);
+                const scoreClass = getScoreClass(matchPercent);
+                const isSavedNow = isJobSaved(job.job_id);
+
+                return `
+                    <div class="job-card">
+                        <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-xl font-bold text-gray-900 mb-2">${job.job_title}</h3>
+
+                                <div class="job-meta mb-3">
+                                    <span class="job-meta-item">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                        </svg>
+                                        ${job.company_name}
+                                    </span>
+                                    <span class="job-meta-item">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                        ${job.location}
+                                    </span>
+                                    <span class="job-meta-item">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        ${getDisplaySalary(job)}
+                                    </span>
+                                </div>
+
+                                <div class="job-chip-row">
+                                    <span class="job-chip primary">${job.employment_type}</span>
+                                    <span class="job-chip">${job.experience_level}</span>
+                                    <span class="job-chip soft">${job.industry}</span>
+                                </div>
+                            </div>
+
+                            <div class="match-wrap">
+                                <div class="score-badge ${scoreClass}">${matchPercent}%</div>
+                                <div class="match-label">Match Score</div>
+                            </div>
+                        </div>
+
+                        <div class="mt-5">
+                            <div class="skills-label">Matched Skills</div>
+                            <div class="skill-list">
+                                ${job.matched_skills.map(skill => `<span class="demand-skill">${skill}</span>`).join('')}
+                            </div>
+                        </div>
+
+                        ${job.missing_skills.length > 0 ? `
+                            <div class="mt-4">
+                                <div class="skills-label">Skills to Develop</div>
+                                <div class="skill-list">
+                                    ${job.missing_skills.map(skill => `<span class="missing-skill">${skill}</span>`).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        <div class="flex flex-col sm:flex-row gap-3 mt-5 pt-5 border-t border-gray-200">
+                            <button onclick="viewJobDetails(${job.job_id})" class="btn-primary btn-primary-sm flex-1 justify-center">
+                                View Details
+                            </button>
+                            <button onclick="toggleSave(${job.job_id})" class="btn-outline btn-outline-sm sm:min-w-[130px] justify-center">
+                                ${isSavedNow ? 'Saved' : 'Save'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function loadPredictions(degree) {
+            try {
+                const response = await fetch(`/api/market?degree=${encodeURIComponent(degree)}`);
+                const data = await response.json();
+
+                if (!data.success) return;
+
+                document.getElementById('currentJobCount').textContent = data.total_jobs.toLocaleString();
+                document.getElementById('avgSalary').textContent = `£${data.avg_salary.toLocaleString()}`;
+
+                const growthText = data.growth_rate > 10 ? 'Strong Growth' :
+                                    data.growth_rate > 4  ? 'Growing' :
+                                    data.growth_rate > 0  ? 'Stable' :
+                                    data.growth_rate > -5 ? 'Slowing' : 'Declining';
+
+                    document.getElementById('marketTrend').innerHTML = `
+                        <div>${growthText}</div>
+                        <div class="text-base font-normal text-gray-600 mt-1">
+                            ${data.growth_rate > 0 ? '+' : ''}${data.growth_rate}% forecast
+                        </div>
+                    `;
+                    
+                document.getElementById('topSkillsList').innerHTML = data.top_skills.map(s => `
+                    <div class="skills-demand-card">
+                        <div class="demand-title">${s.skill}</div>
+                        <div class="demand-meta">In ${s.demand}% of jobs</div>
+                    </div>
+                `).join('');
+
+                const industries = Object.entries(data.jobs_by_industry)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 4);
+
+                document.getElementById('hotSectors').innerHTML = industries.map(([name, count]) => `
+                    <div class="sector-row">
+                        <span class="font-medium text-gray-900">${name}</span>
+                        <span class="trend-up">${count} jobs</span>
+                    </div>
+                `).join('');
+
+                createTrendChart(data);
+                document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
+
+                try {
+                    const vRes  = await fetch('/api/dataset-version');
+                    const vData = await vRes.json();
+                    if (vData.success) {
+                        document.getElementById('datasetVersion').textContent =
+                            `v${vData.version.version} (${vData.version.records} records)`;
+                    }
+                } catch (e) {}
+                
+            } catch (error) {
+                    console.error('Error loading market data:', error);
+            }
+        }
+
+        function createTrendChart(data) {
+            const canvas = document.getElementById('trendChart');
+            const ctx    = canvas.getContext('2d');
+
+            if (trendChartInstance) {
+                trendChartInstance.destroy();
+            }
+
+            const isGrowing = data.growth_rate >= 0;
+
+            trendChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.forecast_labels,
+                    datasets: [{
+                        label: 'Projected Vacancies',
+                        data: data.forecast_points,
+                        borderColor: isGrowing ? '#667eea' : '#f87171',
+                        backgroundColor: isGrowing
+                            ? 'rgba(102, 126, 234, 0.08)'
+                            : 'rgba(248, 113, 113, 0.08)',
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: isGrowing ? '#667eea' : '#f87171',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => `${ctx.raw.toLocaleString()} vacancies`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                callback: val => val >= 1000
+                                    ? `${(val/1000).toFixed(0)}k`
+                                    : val.toLocaleString()
+                            },
+                            grid: { color: 'rgba(15, 23, 42, 0.05)' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function filterJobs() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+            const location = document.getElementById('locationFilter').value.trim().toLowerCase();
+            const minSalary = parseInt(document.getElementById('salaryFilter').value, 10);
+
+            const employmentTypes = Array.from(document.querySelectorAll('.filter-employment:checked'))
+                .map(cb => cb.value.toLowerCase().trim());
+
+            const experienceLevels = Array.from(document.querySelectorAll('.filter-experience:checked'))
+                .map(cb => cb.value.toLowerCase().trim());
+
+            filteredJobs = allJobs.filter(job => {
+                const title = String(job.job_title || '').toLowerCase().trim();
+                const company = String(job.company_name || '').toLowerCase().trim();
+                const jobLocation = String(job.location || '').toLowerCase().trim();
+                const employment = String(job.employment_type || '').toLowerCase().trim();
+                const experience = String(job.experience_level || '').toLowerCase().trim();
+                const salary = Number(job.annual_salary || 0);
+
+                const matchesSearch =
+                    !searchTerm ||
+                    title.includes(searchTerm) ||
+                    company.includes(searchTerm);
+
+                const matchesLocation =
+                    !location ||
+                    jobLocation === location;
+
+                const matchesSalary = (job.min_salary && job.min_salary > 0)
+                    ? job.min_salary >= minSalary
+                    : job.annual_salary >= minSalary;
+
+                const matchesEmployment =
+                    employmentTypes.length === 0 ||
+                    employmentTypes.some(type => employment.includes(type));
+
+                const matchesExperience =
+                    experienceLevels.length === 0 ||
+                    experienceLevels.some(level => experience.includes(level));
+
+                return matchesSearch &&
+                    matchesLocation &&
+                    matchesSalary &&
+                    matchesEmployment &&
+                    matchesExperience;
+            });
+            
+            displayJobs();
+        }
+
+        function sortJobs() {
+            const sortBy = document.getElementById('sortSelect').value;
+
+            if (sortBy === 'match') {
+                filteredJobs.sort((a, b) => b.final_score - a.final_score);
+            } else if (sortBy === 'salary_high') {
+                filteredJobs.sort((a, b) => b.annual_salary - a.annual_salary);
+            } else if (sortBy === 'salary_low') {
+                filteredJobs.sort((a, b) => a.annual_salary - b.annual_salary);
+            }
+
+            displayJobs();
+        }
+
+        function updateSalaryLabel() {
+            const value = document.getElementById('salaryFilter').value;
+            document.getElementById('salaryValue').textContent = parseInt(value).toLocaleString();
+        }
+
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('locationFilter').value = '';
+            document.getElementById('salaryFilter').value = '20000';
+            updateSalaryLabel();
+            document.querySelectorAll('.filter-employment').forEach(cb => cb.checked = false);
+            document.querySelectorAll('.filter-experience').forEach(cb => cb.checked = false);
+            filterJobs();
+        }
+
+        function viewJobDetails(jobId) {
+            localStorage.setItem('selectedJobId', jobId);
+            window.location.href = '/job-details';
+        }
+
+        function toggleSave(jobId) {
+            const job = allJobs.find(j => j.job_id === jobId);
+            if (!job) return;
+
+            if (isJobSaved(jobId)) {
+                unsaveJob(jobId);
+            } else {
+                saveJob(job);
+            }
+
+            displayJobs();
+        }
+
+        function toggleCustomDropdown(id) {
+            const dropdown = document.getElementById(id);
+            const menu = dropdown.querySelector('.custom-select-menu');
+
+            document.querySelectorAll('.custom-select').forEach(d => {
+                if (d !== dropdown) {
+                    d.classList.remove('open');
+                    d.querySelector('.custom-select-menu')?.classList.add('hidden');
+                }
+            });
+
+            dropdown.classList.toggle('open');
+            menu.classList.toggle('hidden');
+        }
+
+        function selectCustomOption(id, value, label, callback) {
+            const dropdown = document.getElementById(id);
+            const hiddenInput = dropdown.querySelector('input');
+            const text = dropdown.querySelector('#sortSelectedText');
+
+            hiddenInput.value = value;
+            text.textContent = label;
+
+            dropdown.querySelectorAll('.custom-select-option')
+                .forEach(o => o.classList.remove('active'));
+
+            event.target.classList.add('active');
+
+            dropdown.classList.remove('open');
+            dropdown.querySelector('.custom-select-menu').classList.add('hidden');
+
+            if (callback) callback();
+        }
+
+        document.addEventListener('click', function(e) {
+            document.querySelectorAll('.custom-select').forEach(d => {
+                if (!d.contains(e.target)) {
+                    d.classList.remove('open');
+                    d.querySelector('.custom-select-menu')?.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

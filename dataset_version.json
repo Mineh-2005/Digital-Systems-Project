@@ -1,0 +1,12 @@
+{
+    "version": "1.0.4",
+    "name": "MarketMatch Dataset",
+    "description": "UK job postings dataset with 1000 records across 35 industries",
+    "records": 1000,
+    "last_updated": "2026-03-31",
+    "changes": [
+        "Initial dataset with 100 records",
+        "Expanded to 1000 records across 35 industries",
+        "Added experience levels, salary ranges and skills"
+    ]
+}
