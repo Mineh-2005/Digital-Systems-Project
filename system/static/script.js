@@ -1,11 +1,5 @@
 /* MarketMatch — Shared Utilities */
 
-/* Auth */
-
-/**
- * Checks if user is logged in, redirects to login if not.
- * Call at the top of window.onload on protected pages.
- */
 function checkLogin() {
     const isLoggedIn = localStorage.getItem('userLoggedIn');
     if (!isLoggedIn) {
@@ -15,9 +9,6 @@ function checkLogin() {
     return true;
 }
 
-/**
- * Logs the user out — clears all localStorage and redirects to login.
- */
 function logout() {
     localStorage.clear();
     window.location.href = '/login';
@@ -25,13 +16,10 @@ function logout() {
 
 /* Nav */
 
-/**
- * Initialises the shared nav:
- * - Sets the Welcome, [Name]! greeting
- * - Adds scroll shadow to nav
+/** Initializes the navigation bar with user greeting, admin link visibility, and scroll behavior.
  *
- * @param {string} greetingId - ID of the greeting <span> element
- * @param {string} navId      - ID of the <nav> element (default: 'mmNav')
+ * @param {string} greetingId 
+ * @param {string} navId     
  */
 function initNav(greetingId = 'navGreeting', navId = 'mmNav') {
     const name = localStorage.getItem('userName') || '';
@@ -71,10 +59,10 @@ function displayUserGreeting(elementId) {
 /**
  * Shows a toast notification at the bottom of the screen.
  *
- * @param {string} message  - Text to display
- * @param {string} type     - 'success' | 'error' | '' (dark default)
- * @param {number} duration - How long to show in ms (default 3000)
- * @param {string} toastId  - ID of the toast element (default 'mmToast')
+ * @param {string} message 
+ * @param {string} type     
+ * @param {number} duration 
+ * @param {string} toastId  
  */
 function showToast(message, type = '', duration = 3000, toastId = 'mmToast') {
     const toast = document.getElementById(toastId);
