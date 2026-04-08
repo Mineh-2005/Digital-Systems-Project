@@ -10,6 +10,7 @@ REQUIRED_COLUMNS = [
     "degree_required", "degrees_accepted", "min_salary", "max_salary"
 ]
 
+# Degree dictionary 
 DEGREE_PATTERNS = [
     r"\b(ph\.?d|doctor of philosophy)\b",
     r"\b(m\.?d|doctor of medicine)\b",
@@ -203,6 +204,7 @@ DEGREE_PATTERNS = [
     r"\bWater Regulations qualification\b",
 ]
 
+# Extract degree information and build profile
 def extract_degree(text: str) -> str:
     if not text:
         return ""
@@ -233,6 +235,7 @@ def extract_degree(text: str) -> str:
 
     return ""
 
+# A curated list of common skills to look for in CVs and job descriptions.
 SKILLS_DICTIONARY = [
     "python", "java", "sql", "excel", "powerbi", "tableau", "git", "linux",
     "docker", "kubernetes", "aws", "azure", "gcp", "javascript", "html", "css",
@@ -282,6 +285,7 @@ DISPLAY_SKILL_MAP = {
 }
 
 
+# Text normalization function to clean and standardize text for better matching.
 def normalize_text(text: str) -> str:
     """Lowercase, expand abbreviations, remove special chars, compress whitespace."""
     if pd.isna(text):
@@ -319,6 +323,7 @@ def remove_stopwords_preserve_short_tokens(text: str) -> str:
     filtered = [t for t in tokens if (t not in BASIC_STOPWORDS) or (t in {"c", "c#", "c++"})]
     return " ".join(filtered)
 
+# Functions to extract text from uploaded files (PDF, DOCX, TXT)
 
 def extract_text_from_pdf(pdf_path: str) -> str:
     """Extract raw text from a PDF file using pypdf."""
@@ -365,7 +370,7 @@ def extract_skills(text: str) -> set:
             found.add(skill)
     return found
 
-
+# processing extracted data
 def parse_required_skills(cell) -> set:
     """Parse a comma-separated skills string into a normalised set."""
     if pd.isna(cell) or not str(cell).strip():
@@ -381,6 +386,7 @@ def parse_degrees_accepted(deg_cell: str) -> list:
     return [p for p in parts if p]
 
 
+# Normalization
 def normalize_degree_text(s: str) -> str:
     """Normalise a degree string for comparison."""
     if pd.isna(s):
@@ -406,7 +412,7 @@ def degree_match(user_degree: str, degrees_accepted_cell: str) -> bool:
         # User degree is contained in accepted degree
         if len(user) > 3 and user in a:
             return True
-        # Check word by word — handles "BSc Computer Science" vs "BSc Computer Science (Hons)"
+    
         user_words = set(user.split())
         accepted_words = set(a.split())
         if len(user_words) >= 2 and user_words.issubset(accepted_words):
@@ -414,7 +420,7 @@ def degree_match(user_degree: str, degrees_accepted_cell: str) -> bool:
 
     return False
 
-
+# Building user profile and job text representations for TF-IDF and skill matching
 def build_job_text(row) -> str:
     """Combine relevant job fields into a single normalised text string for TF-IDF."""
     parts = [
@@ -458,6 +464,7 @@ def display_skill(s: str) -> str:
     return DISPLAY_SKILL_MAP.get(s, s.title())
 
 
+# Functions to load data, prepare the system, and recommend jobs based on user input.
 def load_and_prepare_system(data_path: str):
     """
     Load the dataset, validate columns, build job_skills and job_text,
@@ -489,6 +496,7 @@ def load_and_prepare_system(data_path: str):
     return df, vectorizer, job_tfidf
 
 
+# The main recommendation function that scores and ranks jobs against the user's profile.
 def recommend_jobs(
     df_jobs: pd.DataFrame,
     job_tfidf_matrix,
@@ -594,7 +602,7 @@ def recommend_jobs(
     ]
     return out[cols]
 
-
+# Function that takes the input and returns the recommended jobs with details for the frontend.  
 def recommend_jobs_from_file(
     file_path: str,
     df_jobs: pd.DataFrame,

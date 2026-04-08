@@ -466,13 +466,6 @@
 
                     localStorage.setItem('cvUploaded', 'true');
                     localStorage.setItem('cvFileName', selectedFile.name);
-                    
-
-                // Save summary stats for dashboard
-                // const results = data.results;
-                // const topScore = results.length > 0
-                //     ? Math.round(results[0].final_score * 100)
-                //     : 0;
 
                     const elapsed = Date.now() - startTime;
                     const remaining = Math.max(0, 2000 - elapsed);
@@ -530,12 +523,6 @@
                         degree: degree || 'Not specified',
                         skills: skills
                     }));
-
-                // Save summary stats for dashboard
-                // const results = data.results;
-                // const topScore = results.length > 0
-                //     ? Math.round(results[0].final_score * 100)
-                //     : 0;
 
                     const elapsed = Date.now() - startTime;
                     const remaining = Math.max(0, 1400 - elapsed);

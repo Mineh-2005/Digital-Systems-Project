@@ -775,12 +775,6 @@
         let filteredJobs = [];
         let trendChartInstance = null;
 
-        // function parseSalaryValue(value) {
-        //     if (value === null || value === undefined || value === '') return 0;
-        //     if (typeof value === 'number') return value;
-        //     return Number(String(value).replace(/[^\d.-]/g, '')) || 0;
-        // }
-
         function getJobSalary(job) {
             return (
                 parseSalaryValue(job.annual_salary) ||

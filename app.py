@@ -486,25 +486,24 @@ def api_market():
         top_locations = dict(location_counter.most_common(6))
 
         # Baseline job counts per category to determine growth direction
-        # Higher count = more in-demand field = positive growth
-        # Lower count = declining field = negative growth
-        BASELINE_COUNT = 50000  # average UK job count across all fields
+        # Higher count = more in-demand field = positive growth. Lower count = declining field = negative growth
+        BASELINE_COUNT = 50000 
 
         # thresholds first
         growth_rate = 0.0
 
         if current_count >= 100000:
-            growth_rate = 18.0   # very high demand e.g. software, nursing
+            growth_rate = 18.0  
         elif current_count >= 50000:
-            growth_rate = 10.0   # healthy demand
+            growth_rate = 10.0   
         elif current_count >= 20000:
-            growth_rate = 4.0    # stable
+            growth_rate = 4.0   
         elif current_count >= 5000:
-            growth_rate = -3.0   # slow decline
+            growth_rate = -3.0  
         elif current_count >= 1000:
-            growth_rate = -8.0   # declining field
+            growth_rate = -8.0  
         else:
-            growth_rate = -15.0  # very low demand e.g. carpenter, typist
+            growth_rate = -15.0 
 
         
         forecast_labels = ["Now"] + [f"Month {i}" for i in range(1, 7)]
