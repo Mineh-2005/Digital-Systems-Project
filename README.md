@@ -139,8 +139,8 @@ pip install -r requirements.txt
 Create a `.env` file in the project root with the following contents:
 
 ```
-ADZUNA_APP_ID=your_adzuna_app_id
-ADZUNA_APP_KEY=your_adzuna_app_key
+App_ID= #your_adzuna_app_id
+App_key= #your_adzuna_app_key
 ADMIN_EMAIL=admin@marketmatch.com
 ADMIN_KEY=marketmatch-admin-2026
 ADMIN password= 12345678
